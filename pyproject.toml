@@ -9,6 +9,8 @@ python = "^3.8"
 fastapi = "^0.75.0"
 openai = "^0.15.0"
 python-dotenv = "^0.19.2"
+slowapi = "^0.1.5"
+motor = "^2.5.1"
 
 [tool.poetry.dev-dependencies]
 pip = "^22.0.4"

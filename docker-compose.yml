@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  card-generation-service:
+    build: ./
+    container_name: card-generation-service
+    env_file:
+      - .env
+    networks:
+      - spacey-services
+
+networks:
+  spacey-services:
+    name: spacey-services
+    driver: bridge
