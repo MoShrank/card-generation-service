@@ -146,9 +146,6 @@ async def update_cards(
 async def get_note(request: Request, userID: str, db: DBInterface = Depends(get_db)):
     notes = list(await db.query({"user_id": userID, "cards_added": False}))
 
-    if not notes:
-        return ErrorResponse(message="No cards found", error="No cards found")
-
     notes_by_deck = {}
     for note in notes:
         deck_id = note["deck_id"]
