@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import BaseModel
 
 
-class BaseResponse(ABC):
+class BaseResponse(BaseModel, ABC):
     message: str
     data: Any
 

@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 
 
-class PyObjectId(ObjectId):
+class PyObjectID(ObjectId):
     @classmethod
     def __get_validators__(cls):
         yield cls.validate

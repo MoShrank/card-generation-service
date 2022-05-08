@@ -16,5 +16,5 @@ class DBInterface(ABC):
         pass
 
     @abstractmethod
-    async def update_one(self, id: str, document: Dict):
+    async def update_one(self, query: Dict, update: Dict):
         pass
