@@ -12,10 +12,10 @@ python-dotenv = "^0.19.2"
 slowapi = "^0.1.5"
 motor = "^2.5.1"
 requests = "^2.27.1"
+uvicorn = {extras = ["standard"], version = "^0.17.6"}
 
 [tool.poetry.dev-dependencies]
 pip = "^22.0.4"
-uvicorn = {extras = ["standard"], version = "^0.17.6"}
 black = "^22.1.0"
 mypy = "^0.950"
 types-requests = "^2.27.25"
