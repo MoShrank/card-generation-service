@@ -17,10 +17,10 @@ jobs:
         with:
           python-version: "3.x"
       - name: Setup Poetry
-        run: | 
-        pip install "poetry==1.1.11"
-        poetry config virtualenvs.create false
-        poetry install
+        run: |
+          pip install "poetry==1.1.11"
+          poetry config virtualenvs.create false
+          poetry install
       #- name: Run mypy
       #  python -m mypy .
       - name: Run tests
