@@ -17,13 +17,14 @@ app.include_router(router)
 
 @app.on_event("startup")
 async def startup_event():
-    model_config_id = env_config.MODEL_CONFIG_ID
-    model_config_id = PyObjectID(model_config_id)
-    model_config = await dependencies.config_repo.find_one({"_id": model_config_id})
-    model_config = ModelConfig(**model_config)
+    if env_config.ENV != "development":
+        model_config_id = env_config.MODEL_CONFIG_ID
+        model_config_id = PyObjectID(model_config_id)
+        model_config = await dependencies.config_repo.find_one({"_id": model_config_id})
+        model_config = ModelConfig(**model_config)
 
-    dependencies.model_config = model_config
-    dependencies.card_generation_api.set_config(model_config)
+        dependencies.model_config = model_config
+        dependencies.card_generation_api.set_config(model_config)
 
 
 @app.get("/ping")

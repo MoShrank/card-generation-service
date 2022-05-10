@@ -69,7 +69,7 @@ async def generate_cards(
     note_repo: DBInterface = Depends(get_note_repo),
     card_generation_api: CardGenerationAPIInterface = Depends(get_card_generation_api),
 ):
-    open_ai_user: User = await user_repo.find_one({"user_id": PyObjectID(userID)})
+    open_ai_user: User = await user_repo.find_one({"user_id": userID})
 
     if not open_ai_user:
         open_ai_user = User(user_id=userID, total_no_generated=1)
@@ -78,7 +78,7 @@ async def generate_cards(
     else:
         open_ai_user_id = str(open_ai_user["_id"])
         await user_repo.update_one(
-            open_ai_user["_id"], {"$inc": {"total_no_generated": 1}}
+            {"_id": open_ai_user["_id"]}, {"$inc": {"total_no_generated": 1}}
         )
 
     text = body.text
@@ -86,7 +86,8 @@ async def generate_cards(
 
     note = await note_repo.find_one({"encoding": hash})
     if note:
-        note = Note(**note).dict()
+        note = Note(**note).dict(by_alias=False)
+
         existing_cards = get_latest_cards_from_note(note)
         return CardsResponse(
             message="Note already exists", data={**note, "cards": existing_cards}

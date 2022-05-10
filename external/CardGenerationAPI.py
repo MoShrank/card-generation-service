@@ -36,9 +36,9 @@ class CardGenerationAPI(CardGenerationAPIInterface):
             max_tokens=self._model_parameters.max_tokens,
             top_p=self._model_parameters.top_p,
             n=self._model_parameters.n,
-            stop_sequence=self._model_parameters.stop_sequence,
+            stop=self._model_parameters.stop_sequence,
             prompt=prompt,
-            user_id=user_id,
+            user=user_id,
         )
 
         return res
