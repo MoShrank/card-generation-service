@@ -1,6 +1,6 @@
+import logging
 from datetime import datetime
 from typing import Dict, List
-from urllib import response
 
 from config import env_config
 from database.db_interface import DBInterface
@@ -13,8 +13,9 @@ from dependencies import (
 from external.CardGenerationAPI import CardGenerationAPIInterface
 from external.DeckServiceAPI import DeckServiceAPIInterface
 from fastapi import APIRouter, Depends, Request
-from models.HttpModels import ErrorResponse
+from models.HttpModels import HTTPException
 from models.Note import (
+    AddedCardsResponse,
     Card,
     Cards,
     CardsResponse,
@@ -29,6 +30,8 @@ from models.User import User
 from text_processing.post_processing import parse_completion
 from text_processing.pre_processing import encode_text, generate_prompt
 from util.limitier import limiter
+
+logger = logging.getLogger("logger")
 
 USER_RATE_LIMIT = env_config.USER_RATE_LIMIT_PER_MINUTE
 
@@ -84,15 +87,6 @@ async def generate_cards(
     text = body.text
     hash = encode_text(text)
 
-    note = await note_repo.find_one({"encoding": hash})
-    if note:
-        note = Note(**note).dict(by_alias=False)
-
-        existing_cards = get_latest_cards_from_note(note)
-        return CardsResponse(
-            message="Note already exists", data={**note, "cards": existing_cards}
-        )
-
     prompt = generate_prompt(text=text)
     response = card_generation_api.generate_cards(
         prompt=prompt, user_id=open_ai_user_id
@@ -126,35 +120,48 @@ async def generate_cards(
     return CardsResponse(message="success", data={**document, "cards": cards.cards})
 
 
-@router.post("{id}/cards")
+@router.post(
+    "/{id}/cards", response_model=AddedCardsResponse, response_model_by_alias=True
+)
 async def add_cards(
     id: str,
     deck_id: str,
-    user_id: str,
+    userID: str,
     note_repo: DBInterface = Depends(get_note_repo),
     deck_service: DeckServiceAPIInterface = Depends(get_deck_service),
 ):
     note: Note = await note_repo.find_one(
-        {"_id": PyObjectID(id), "user_id": user_id, "deck_id": deck_id}
+        {"_id": PyObjectID(id), "user_id": userID, "deck_id": deck_id}
     )
 
     if not note:
-        return ErrorResponse(message="Note not found")
+        raise HTTPException(
+            status_code=404, message="Failed to save cards", error="Note not found"
+        )
 
     if note["cards_added"]:
-        return ErrorResponse(message="Cards already added")
+        raise HTTPException(
+            status_code=409, message="Failed to save cards", error="Cards Already added"
+        )
 
     cards = get_latest_cards_from_note(note)
 
     try:
-        deck_service.save_cards(user_id=user_id, deck_id=deck_id, cards=cards)
-    except:
-        return ErrorResponse(message="Failed to save cards")
+        cards = deck_service.save_cards(user_id=userID, deck_id=deck_id, cards=cards)
+    except Exception as e:
+        logger.error(f"Failed to save cards when sending request to deck service: {e}")
+        raise HTTPException(
+            status_code=500,
+            message="Failed to save cards",
+            error=f"Failed sending request to deck service",
+        )
 
     await note_repo.update_one(
         {"_id": PyObjectID(id)},
         {"$set": {"cards_added": True}},
     )
+
+    return AddedCardsResponse(message="success", data={"cards": cards})
 
 
 @router.put("/{id}", response_model=UpdatedCardsResponse)
@@ -172,7 +179,7 @@ async def update_cards(
     )
 
     await note_repo.update_one(
-        {"_id": id, "user_id": userID}, {"$push": {"cards": cards.dict()}}
+        {"_id": PyObjectID(id), "user_id": userID}, {"$push": {"cards": cards.dict()}}
     )
 
     return UpdatedCardsResponse(

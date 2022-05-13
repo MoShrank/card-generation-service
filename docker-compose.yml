@@ -5,6 +5,8 @@ services:
     container_name: card-generation-service
     env_file:
       - .env
+    environment:
+      MONGO_DB_CONNECTION: "mongodb://mongodb:27017"
     networks:
       - spacey-services
 
