@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
+from typing import List
 
 from bson.objectid import ObjectId
-from dependencies import get_note_repo, get_user_repo
+from dependencies import get_deck_service, get_note_repo, get_user_repo
 from fastapi.testclient import TestClient
 from main import app
+from models.Note import Card
 from util.AttrDict import AttrDict
 
 client = TestClient(app)
@@ -66,8 +68,20 @@ def get_user_repo_mock():
     return UserRepoMock()
 
 
+class DeckServiceAPIMock:
+    def save_cards(self, user_id: str, deck_id: str, cards: List[Card]):
+        return [
+            {"id": "1", "question": "late", "answer": "late", "deck_id": "1"},
+        ]
+
+
+def get_deck_service_mock():
+    return DeckServiceAPIMock()
+
+
 app.dependency_overrides[get_note_repo] = get_note_repo_mock
 app.dependency_overrides[get_user_repo] = get_user_repo_mock
+app.dependency_overrides[get_deck_service] = get_deck_service_mock
 
 
 def test_get_notes():
@@ -129,11 +143,38 @@ def test_update_cards():
         ],
     }
 
-    response = client.put("/notes/1?userID=1", json=data)
+    response = client.put(f"/notes/{OBJECT_ID}?userID=1", json=data)
 
     assert response.status_code == expected_status_code
     assert response.json()["data"] == expected_data
 
 
 def test_add_cards():
-    pass
+    async def mockFindOne(self, query):
+        return {
+            "cards_added": False,
+            "cards": [
+                {
+                    "cards": [
+                        {
+                            "question": "late",
+                            "answer": "late",
+                        }
+                    ],
+                    "deck_id": "1",
+                    "created_at": datetime.now().isoformat(),
+                },
+            ],
+        }
+
+    NoteRepoMock.find_one = mockFindOne
+
+    expected_status_code = 200
+    expected_data = {
+        "cards": [{"id": "1", "question": "late", "answer": "late", "deck_id": "1"}]
+    }
+
+    response = client.post(f"/notes/{OBJECT_ID}/cards?userID=1&deck_id=1")
+
+    assert response.status_code == expected_status_code
+    assert response.json()["data"] == expected_data

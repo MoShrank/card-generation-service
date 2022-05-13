@@ -52,7 +52,7 @@ class CardGenerationAPIMock(CardGenerationAPIInterface):
         text = AttrDict()
         text.update(
             {
-                "text": "Q: What is the capital of the United States? A: Washington D.C.",
+                "text": """Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C.""",
             }
         )
 

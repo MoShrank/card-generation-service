@@ -74,3 +74,17 @@ class UpdatedCardsResponse(BaseResponse):
 
 class UpdateCardsRequest(BaseModel):
     cards: List[Card]
+
+
+class DeckServiceCard(BaseModel):
+    id: str
+    question: str
+    answer: str
+    deck_id: str = Field(default=(...), alias="deckID")
+
+
+class AddedCardsResponse(BaseResponse):
+    class Data(BaseModel):
+        cards: List[DeckServiceCard]
+
+    data: Data
