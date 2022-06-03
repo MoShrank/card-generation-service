@@ -7,6 +7,7 @@ from database.db_interface import DBInterface
 from dependencies import (
     get_card_generation_api,
     get_deck_service,
+    get_model_config,
     get_note_repo,
     get_user_repo,
 )
@@ -72,7 +73,7 @@ async def generate_cards(
     user_repo: DBInterface = Depends(get_user_repo),
     note_repo: DBInterface = Depends(get_note_repo),
     card_generation_api: CardGenerationAPIInterface = Depends(get_card_generation_api),
-    model_config: ModelConfig = Depends(ModelConfig),
+    model_config: ModelConfig = Depends(get_model_config),
 ):
     existing_open_ai_user: Dict = await user_repo.find_one({"user_id": userID})
 

@@ -22,7 +22,6 @@ class ModelParameters(BaseModel):
 
 class ModelConfig(BaseModel):
     id: PyObjectID = Field(default_factory=PyObjectID, alias="_id")
-    description: str
     type: str
     parameters: ModelParameters
     examples: List[Example]
