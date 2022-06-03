@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from config import env_config
 from database.db_interface import DBInterface
@@ -14,6 +14,7 @@ from external.CardGenerationAPI import CardGenerationAPIInterface
 from external.DeckServiceAPI import DeckServiceAPIInterface
 from fastapi import APIRouter, Depends, Request
 from models.HttpModels import HTTPException
+from models.ModelConfig import ModelConfig
 from models.Note import (
     AddedCardsResponse,
     Card,
@@ -41,7 +42,7 @@ router = APIRouter(
 )
 
 
-def get_latest_cards_from_note(note: Note) -> List[Card]:
+def get_latest_cards_from_note(note: Dict) -> List[Card]:
     cards = sorted(note["cards"], key=lambda x: x["created_at"], reverse=True)[0][
         "cards"
     ]
@@ -49,8 +50,8 @@ def get_latest_cards_from_note(note: Note) -> List[Card]:
     return cards
 
 
-def map_notes_to_deck(notes: List[Note]) -> Dict[str, Note]:
-    notes_by_deck_id: Dict[str, Note] = {}
+def map_notes_to_deck(notes: List[Dict]) -> Dict[str, Dict]:
+    notes_by_deck_id: Dict[str, Dict] = {}
 
     for note in notes:
         deck_id = note["deck_id"]
@@ -71,27 +72,27 @@ async def generate_cards(
     user_repo: DBInterface = Depends(get_user_repo),
     note_repo: DBInterface = Depends(get_note_repo),
     card_generation_api: CardGenerationAPIInterface = Depends(get_card_generation_api),
+    model_config: ModelConfig = Depends(ModelConfig),
 ):
-    open_ai_user: User = await user_repo.find_one({"user_id": userID})
+    existing_open_ai_user: Dict = await user_repo.find_one({"user_id": userID})
 
-    if not open_ai_user:
-        open_ai_user = User(user_id=userID, total_no_generated=1)
-        result = await user_repo.insert_one(open_ai_user.dict(by_alias=True))
+    if not existing_open_ai_user:
+        new_open_ai_user = User(user_id=userID, total_no_generated=1)
+        result = await user_repo.insert_one(new_open_ai_user.dict(by_alias=True))
         open_ai_user_id = str(result.inserted_id)
     else:
-        open_ai_user_id = str(open_ai_user["_id"])
         await user_repo.update_one(
-            {"_id": open_ai_user["_id"]}, {"$inc": {"total_no_generated": 1}}
+            {"_id": existing_open_ai_user["_id"]}, {"$inc": {"total_no_generated": 1}}
         )
+        open_ai_user_id = str(existing_open_ai_user["_id"])
 
     text = body.text
     hash = encode_text(text)
 
-    prompt = generate_prompt(text=text)
-    response = card_generation_api.generate_cards(
+    prompt = generate_prompt(text=text, model_config=model_config)
+    completion = card_generation_api.generate_cards(
         prompt=prompt, user_id=open_ai_user_id
     )
-    completion = response.choices[0].text
     parsed_qas = parse_completion(completion=completion)
 
     cards = Cards(
@@ -130,7 +131,7 @@ async def add_cards(
     note_repo: DBInterface = Depends(get_note_repo),
     deck_service: DeckServiceAPIInterface = Depends(get_deck_service),
 ):
-    note: Note = await note_repo.find_one(
+    note: Dict = await note_repo.find_one(
         {"_id": PyObjectID(id), "user_id": userID, "deck_id": deck_id}
     )
 
@@ -192,7 +193,7 @@ async def get_note(
     userID: str,
     note_repo: DBInterface = Depends(get_note_repo),
 ):
-    notes: List[Note] = await note_repo.query({"user_id": userID, "cards_added": False})
+    notes: List[Dict] = await note_repo.query({"user_id": userID, "cards_added": False})
 
     notes_by_deck = map_notes_to_deck(notes)
 

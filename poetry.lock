@@ -181,6 +181,14 @@ python-versions = "*"
 six = ">=1.4.1"
 
 [[package]]
+name = "mongo-types"
+version = "0.15.1"
+description = "Type stubs for mongoengine w/ basic support for bson and pymongo"
+category = "dev"
+optional = false
+python-versions = ">=3.7,<4.0"
+
+[[package]]
 name = "motor"
 version = "2.5.1"
 description = "Non-blocking MongoDB driver for Tornado or asyncio"
@@ -633,7 +641,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "fab385326e99b960bb07938cde67edffd6f7c51470478e966595ffd4b769946f"
+content-hash = "dc97395962fdb97e6b76f2cc8752ef7b3fc37fac7656f6d8e982270ddc85fbb6"
 
 [metadata.files]
 anyio = [
@@ -752,6 +760,10 @@ iniconfig = [
 limits = [
     {file = "limits-1.6-py3-none-any.whl", hash = "sha256:12ae4449cf7daadee43edf4096acd9cb9f4bfdec3a995aa9fbd0f72b0b9af762"},
     {file = "limits-1.6.tar.gz", hash = "sha256:6c0a57b42647f1141f5a7a0a8479b49e4367c24937a01bd9d4063a595c2dd48a"},
+]
+mongo-types = [
+    {file = "mongo-types-0.15.1.tar.gz", hash = "sha256:0a9deeb7733ea7da5db3711d92e22d93556b522f860bbff82e5df44c53bd06a9"},
+    {file = "mongo_types-0.15.1-py3-none-any.whl", hash = "sha256:9417ae5b9a759c09630b5ec7d66904cc333c2d2fcfe75e2760a332ed5e267309"},
 ]
 motor = [
     {file = "motor-2.5.1-py3-none-any.whl", hash = "sha256:961fdceacaae2c7236c939166f66415be81be8bbb762da528386738de3a0f509"},

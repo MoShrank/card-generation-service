@@ -30,7 +30,7 @@ class CardGenerationAPI(CardGenerationAPIInterface):
         self._model_parameters = model_config.parameters
 
     def generate_cards(self, prompt: str, user_id: str) -> str:
-        res = openai.Completion.create(
+        response = openai.Completion.create(
             temperature=self._model_parameters.temperature,
             engine=self._model_parameters.engine,
             max_tokens=self._model_parameters.max_tokens,
@@ -41,7 +41,9 @@ class CardGenerationAPI(CardGenerationAPIInterface):
             user=user_id,
         )
 
-        return res
+        completion = response.choices[0].text
+
+        return completion
 
 
 class CardGenerationAPIMock(CardGenerationAPIInterface):
@@ -49,14 +51,4 @@ class CardGenerationAPIMock(CardGenerationAPIInterface):
         pass
 
     def generate_cards(self, prompt: str, user_id: str) -> Any:
-        text = AttrDict()
-        text.update(
-            {
-                "text": """Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C.""",
-            }
-        )
-
-        response = AttrDict()
-        response.update({"choices": [text]})
-
-        return response
+        return "Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C."

@@ -1,6 +1,6 @@
 from typing import Dict
 
-import motor.motor_asyncio
+import motor.motor_asyncio  # type: ignore
 from config import env_config
 
 from database.db_interface import DBInterface

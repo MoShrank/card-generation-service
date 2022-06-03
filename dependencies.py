@@ -1,7 +1,14 @@
+from typing import Optional
+
 from config import env_config
 from database.db import DBConnection, DBOperations
-from external.CardGenerationAPI import CardGenerationAPI, CardGenerationAPIMock
+from external.CardGenerationAPI import (
+    CardGenerationAPI,
+    CardGenerationAPIInterface,
+    CardGenerationAPIMock,
+)
 from external.DeckServiceAPI import DeckServiceAPI
+from models.ModelConfig import ModelConfig
 
 NOTES_COLLECTION = "note"
 USER_COLLECTION = "openaiUser"
@@ -13,12 +20,12 @@ note_repo = DBOperations(NOTES_COLLECTION, db_connection)
 user_repo = DBOperations(USER_COLLECTION, db_connection)
 config_repo = DBOperations(OPENAI_CONFIG_COLLECTION, db_connection)
 
-model_config = None
+model_config: Optional[ModelConfig] = None
 
 deck_service = DeckServiceAPI(env_config)
 
 if env_config.ENV == "development":
-    card_generation_api = CardGenerationAPIMock()
+    card_generation_api: CardGenerationAPIInterface = CardGenerationAPIMock()
 else:
     card_generation_api = CardGenerationAPI(env_config)
 
