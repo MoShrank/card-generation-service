@@ -12,7 +12,7 @@ def get_qa_text(qa: Card) -> str:
 def get_example_text(
     example: Example, stop_sequence: str, card_prefix: str, note_prefix: str
 ) -> str:
-    examples_text = "\n".join([get_qa_text(qa) for qa in example.cards])
+    examples_text = "\n\n".join([get_qa_text(qa) for qa in example.cards])
 
     example_text = (
         note_prefix
