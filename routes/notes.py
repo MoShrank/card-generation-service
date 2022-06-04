@@ -109,6 +109,7 @@ async def generate_cards(
         deck_id=body.deck_id,
         text=text,
         completion=completion,
+        prompt=prompt,
         cards_added=False,
         cards=[cards],
         created_at=datetime.now().isoformat(),

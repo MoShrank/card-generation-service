@@ -28,6 +28,7 @@ class Note(MongoModel):
     deck_id: str
     text: str
     completion: str
+    prompt: str
     cards_added: bool
     cards: List[Cards]
     created_at: datetime

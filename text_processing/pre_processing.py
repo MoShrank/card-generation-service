@@ -16,11 +16,11 @@ def get_example_text(
 
     example_text = (
         note_prefix
-        + "\n\n"
+        + "\n"
         + example.note
-        + "\n\n"
+        + "\n"
         + card_prefix
-        + "\n\n"
+        + "\n"
         + examples_text
         + "\n\n"
         + stop_sequence
@@ -35,7 +35,7 @@ def preprocess_text(text: str) -> str:
 
 def generate_prompt(text: str, model_config: ModelConfig) -> str:
     preprocessed_text = preprocess_text(text)
-    examples_text = "\n".join(
+    examples_text = "\n\n".join(
         [
             get_example_text(
                 example,
@@ -53,11 +53,11 @@ def generate_prompt(text: str, model_config: ModelConfig) -> str:
         + examples_text
         + "\n\n"
         + model_config.note_prefix
-        + "\n\n"
+        + "\n"
         + preprocessed_text
         + "\n\n"
         + model_config.card_prefix
-        + "\n\n"
+        + "\n"
         + "Q:"
     )
 
