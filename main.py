@@ -64,14 +64,15 @@ async def http_exception_handler(request, exception: HTTPException):
 
 @app.on_event("startup")
 async def startup_event():
-    if env_config.ENV != "development":
-        model_config_id = env_config.MODEL_CONFIG_ID
-        model_config_id = PyObjectID(model_config_id)
-        model_config = await dependencies.config_repo.find_one({"_id": model_config_id})
-        model_config = ModelConfig(**model_config)
+    model_config_id = env_config.MODEL_CONFIG_ID
+    model_config_obj_id = PyObjectID(model_config_id)
+    model_config = await dependencies.config_repo.find_one({"_id": model_config_obj_id})
+    if not model_config:
+        raise Exception(f"Could not find model config with id: {model_config_id}")
+    model_config = ModelConfig(**model_config)
 
-        dependencies.model_config = model_config
-        dependencies.card_generation_api.set_config(model_config)
+    dependencies.model_config = model_config
+    dependencies.card_generation_api.set_config(model_config)
 
 
 @app.get("/ping")

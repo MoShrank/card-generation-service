@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Any, Union
+from typing import Any
 
 import openai
 from config import EnvConfig
 from models.ModelConfig import ModelConfig, ModelParameters
-from util.AttrDict import AttrDict
 
 
 class CardGenerationAPIInterface(ABC):
