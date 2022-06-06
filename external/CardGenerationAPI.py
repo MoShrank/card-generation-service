@@ -50,4 +50,4 @@ class CardGenerationAPIMock(CardGenerationAPIInterface):
         pass
 
     def generate_cards(self, prompt: str, user_id: str) -> Any:
-        return "Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C. Q: What is the capital of the United States? A: Washington D.C."
+        return "Q: What is the capital of the United States?\nA: Washington D.C.\n\nQ: What is the capital of the United States?\nA: Washington D.C.\n\nQ: What is the capital of the United States?\nA: Washington D.C.\n\nQ: What is the capital of the United States?\nA: Washington D.C.\n\nQ: What is the capital of the United States?\nA: Washington D.C."
