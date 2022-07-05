@@ -35,23 +35,28 @@ def preprocess_text(text: str) -> str:
 
 def generate_prompt(text: str, model_config: ModelConfig) -> str:
     preprocessed_text = preprocess_text(text)
-    examples_text = "\n\n".join(
-        [
-            get_example_text(
-                example,
-                model_config.parameters.stop_sequence[0],
-                model_config.card_prefix,
-                model_config.note_prefix,
-            )
-            for example in model_config.examples
-        ]
-    )
+
+    examples_text = ""
+
+    if len(model_config.examples):
+        examples_text = "\n\n".join(
+            [
+                get_example_text(
+                    example,
+                    model_config.parameters.stop_sequence[0],
+                    model_config.card_prefix,
+                    model_config.note_prefix,
+                )
+                for example in model_config.examples
+            ]
+        )
+
+        examples_text += "\n\n" + model_config.parameters.stop_sequence[0]
 
     prompt = (
         model_config.prompt_prefix
         + "\n\n"
         + examples_text
-        + "\n\n"
         + model_config.note_prefix
         + "\n"
         + preprocessed_text
