@@ -185,6 +185,23 @@ def test_update_cards():
     assert response.json()["data"] == expected_data
 
 
+def test_update_cards_empty_card():
+    expected_status_code = 422
+
+    data = {
+        "cards": [
+            {
+                "question": "",
+                "answer": "",
+            }
+        ],
+    }
+
+    response = client.put(f"/notes/{OBJECT_ID}?userID=1", json=data)
+
+    assert response.status_code == expected_status_code
+
+
 def test_add_cards():
     async def mockFindOne(self, query):
         return {

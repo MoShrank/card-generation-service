@@ -11,8 +11,8 @@ from models.PyObjectID import PyObjectID
 
 # MongoDB models
 class Card(BaseModel):
-    question: str
-    answer: str
+    question: str = Field(min_length=1, strip_whitespace=True)
+    answer: str = Field(min_length=1, strip_whitespace=True)
 
 
 class Cards(BaseModel):
