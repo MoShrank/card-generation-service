@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Dict, List
 
-from pydantic import BaseModel, Field
+from config import env_config
+from pydantic import BaseModel, Field, constr
 
 from models.HttpModels import BaseResponse
 from models.MongoModel import MongoModel
@@ -53,7 +54,7 @@ class NotesResponse(BaseResponse):
 
 
 class GenerateCardsRequest(BaseModel):
-    text: str
+    text: str = Field(max_length=env_config.MAX_TEXT_LENGTH, strip_whitespace=True)
     deck_id: str
 
 

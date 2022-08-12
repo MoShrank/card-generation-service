@@ -14,6 +14,7 @@ class EnvConfig(BaseSettings):
     DATABASE: str = Field("spacey", env="DATABASE")
     ENV: str = Field("development", env="ENV")
     MODEL_CONFIG_ID: str = Field(None, env="MODEL_CONFIG_ID")
+    MAX_TEXT_LENGTH: int = Field(1000, env="MAX_TEXT_LENGTH")
 
 
 load_dotenv(find_dotenv())

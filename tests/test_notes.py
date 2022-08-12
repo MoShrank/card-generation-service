@@ -131,7 +131,8 @@ def test_create_cards():
                 "question": "What is the capital of the United States?",
                 "answer": "Washington D.C.",
             },
-        ],
+        ]
+        * 5,
     }
 
     data = {
@@ -139,10 +140,23 @@ def test_create_cards():
         "deck_id": "1",
     }
     response = client.post(f"/notes?userID={str(OBJECT_ID)}", json=data)
-    # response_data = response.json()["data"]
+    response_data = response.json()["data"]
     print("response: ", response.json())
     assert response.status_code == expected_status_code
-    # assert response_data == expeceted_data
+    assert response_data == expeceted_data
+
+
+def test_create_cards_exceed_char_limit():
+    expected_status_code = 422
+
+    data = {
+        "text": "t" * 1001,
+        "deck_id": "1",
+    }
+
+    response = client.post(f"/notes?userID={str(OBJECT_ID)}", json=data)
+
+    assert response.status_code == expected_status_code
 
 
 def test_update_cards():
