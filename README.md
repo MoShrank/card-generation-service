@@ -1,5 +1,5 @@
 # card-generation-service
-The card-generation-service is responsible for handling notes and creating generating cards out of them by calling the GPT-3 API.
+The card-generation-service is responsible for handling notes and the automated generation of cards by using GPT-3.
 
 ## Getting Started
 
@@ -13,7 +13,7 @@ poetry install
 ```
 
 ### Environment Variables
-All environment variables needed for production can be found inside the [config.py](./config.py) file. To run it locally the following environment variables are needed:
+All environment variables needed for production can be found inside the [config.py](./config.py) file. For running it locally the following environment variables are needed:
 
 ```
 OPENAI_API_KEY=<openai-api-key>
@@ -22,7 +22,7 @@ MONGO_DB_CONNECTION = <mongo-db-connection>
 MODEL_CONFIG_ID = <model-config-id>
 ENV = development
 ```
-To make testing it locally more easier the openai api to generate cards is only called when ENV is set to production otherwise it just returns a list of dummy cards. In addition to that, the model config id needs to be provided which is used to query a config from the database. The config needs to be inserted manully before starting the service and needs to correspond to the config schema as defined [here](./models/ModelConfig.py).
+For testing purposes the openai api to generate cards is only called when ENV is set to production otherwise it just returns a list of dummy cards. In addition to that, the model_config_id needs to be provided which is used to query a config from the database. The config needs to be inserted manually before starting the service and needs to correspond to the config schema as defined [here](./models/ModelConfig.py).
 
 ### Serve Backend
 ```
