@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from config import env_config
 from database.db_interface import DBInterface

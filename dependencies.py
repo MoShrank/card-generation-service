@@ -13,11 +13,13 @@ from models.ModelConfig import ModelConfig
 NOTES_COLLECTION = "note"
 USER_COLLECTION = "openaiUser"
 OPENAI_CONFIG_COLLECTION = "modelConfig"
+WEBCONTENT_COLLECTION = "webContent"
 
 db_connection = DBConnection(env_config.DATABASE)
 
 note_repo = DBOperations(NOTES_COLLECTION, db_connection)
 user_repo = DBOperations(USER_COLLECTION, db_connection)
+web_content_repo = DBOperations(WEBCONTENT_COLLECTION, db_connection)
 config_repo = DBOperations(OPENAI_CONFIG_COLLECTION, db_connection)
 
 model_config: Optional[ModelConfig] = None
@@ -36,6 +38,10 @@ def get_note_repo():
 
 def get_user_repo():
     return user_repo
+
+
+def get_web_content_repo():
+    return web_content_repo
 
 
 def get_card_generation_api():

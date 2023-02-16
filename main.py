@@ -12,7 +12,8 @@ from config import env_config
 from models.HttpModels import HTTPException
 from models.ModelConfig import ModelConfig
 from models.PyObjectID import PyObjectID
-from routes.notes import router
+from routes.notes import router as notes_router
+from routes.web_content import router as web_content_router
 from util.limitier import limiter
 
 
@@ -48,7 +49,8 @@ dictConfig(LogConfig().dict())
 app = FastAPI()
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-app.include_router(router)
+app.include_router(notes_router)
+app.include_router(web_content_router)
 
 
 @app.exception_handler(HTTPException)
