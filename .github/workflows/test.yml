@@ -1,27 +1,27 @@
 name: Run Tests
 
 on:
-  push:
-    branches: [master]
-  workflow_dispatch:
+    push:
+        branches: [master]
+    workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+    test:
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
+        steps:
+            - uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-      - name: Setup Poetry
-        run: |
-          pip install "poetry==1.1.11"
-          poetry config virtualenvs.create false
-          poetry install
-      #- name: Run mypy
-      #  python -m mypy .
-      - name: Run tests
-        run: python -m pytest
+            - name: Setup Python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: "3.9.1"
+            - name: Setup Poetry
+              run: |
+                  pip install "poetry==1.1.11"
+                  poetry config virtualenvs.create false
+                  poetry install
+            #- name: Run mypy
+            #  python -m mypy .
+            - name: Run tests
+              run: python -m pytest
