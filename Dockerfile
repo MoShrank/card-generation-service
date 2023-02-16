@@ -12,7 +12,7 @@ WORKDIR /app
 
 COPY . /app
 
-RUN pip install "poetry==1.1.11"
+RUN pip install "poetry==1.2.0"
 
 RUN poetry config virtualenvs.create false && poetry install --no-dev
 
