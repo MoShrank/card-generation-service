@@ -1,14 +1,16 @@
 import logging
+from datetime import datetime
+from typing import Dict, List
+
 from fastapi import APIRouter, Depends
+
+from database.db_interface import DBInterface
+from dependencies import get_web_content_repo
+from models import WebContent
 from models.HttpModels import HTTPException
 from models.WebContent import WebContentRequest, WebContentResponse
-from typing import List, Dict
-from dependencies import get_web_content_repo
-from database.db_interface import DBInterface
-from models import WebContent
-from util.scraper import get_content
 from text_processing.extract_info import extract_info
-from datetime import datetime
+from util.scraper import get_content
 
 logger = logging.getLogger("logger")
 
@@ -45,7 +47,7 @@ async def create_post(
         raise HTTPException(
             status_code=500,
             message="Failed to scrape web page",
-            error=f"Failed sending request to deck service",
+            error="Failed sending request to deck service",
         )
 
     info = extract_info(raw_content)
