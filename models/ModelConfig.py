@@ -13,7 +13,7 @@ class Example(BaseModel):
 
 class ModelParameters(BaseModel):
     temperature: int
-    engine: str
+    model: str
     max_tokens: int
     top_p: int
     n: int

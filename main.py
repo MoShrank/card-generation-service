@@ -1,4 +1,4 @@
-import logging
+from contextlib import asynccontextmanager
 from logging.config import dictConfig
 
 from fastapi import FastAPI
@@ -9,6 +9,10 @@ from slowapi.errors import RateLimitExceeded
 
 import dependencies
 from config import env_config
+from external.CardGeneration import (
+    CardGeneration,
+    CardGenerationMock,
+)
 from models.HttpModels import HTTPException
 from models.ModelConfig import ModelConfig
 from models.PyObjectID import PyObjectID
@@ -46,7 +50,28 @@ class LogConfig(BaseModel):
 dictConfig(LogConfig().dict())
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if env_config.ENV == "production":
+        model_config_id = env_config.MODEL_CONFIG_ID
+        model_config_obj_id = PyObjectID(model_config_id)
+        model_config = await dependencies.config_repo.find_one(
+            {"_id": model_config_obj_id}
+        )
+        if not model_config:
+            raise Exception(f"Could not find model config with id: {model_config_id}")
+        model_config = ModelConfig(**model_config)
+
+        dependencies.card_generation = CardGeneration(
+            model_config, env_config.OPENAI_API_KEY
+        )
+    else:
+        dependencies.card_generation = CardGenerationMock()
+
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(notes_router)
@@ -62,19 +87,6 @@ async def http_exception_handler(request, exception: HTTPException):
             "error": exception.error,
         },
     )
-
-
-@app.on_event("startup")
-async def startup_event():
-    model_config_id = env_config.MODEL_CONFIG_ID
-    model_config_obj_id = PyObjectID(model_config_id)
-    model_config = await dependencies.config_repo.find_one({"_id": model_config_obj_id})
-    if not model_config:
-        raise Exception(f"Could not find model config with id: {model_config_id}")
-    model_config = ModelConfig(**model_config)
-
-    dependencies.model_config = model_config
-    dependencies.card_generation_api.set_config(model_config)
 
 
 @app.get("/ping")

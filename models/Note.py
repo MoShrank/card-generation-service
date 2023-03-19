@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Dict, List
 
-from config import env_config
-from pydantic import BaseModel, Field, constr
+from pydantic import BaseModel, Field
 
+from config import env_config
 from models.HttpModels import BaseResponse
 from models.MongoModel import MongoModel
 from models.PyObjectID import PyObjectID
@@ -28,8 +28,6 @@ class Note(MongoModel):
     user_id: str
     deck_id: str
     text: str
-    completion: str
-    prompt: str
     cards_added: bool
     cards: List[Cards]
     created_at: datetime

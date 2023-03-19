@@ -2,10 +2,9 @@ from typing import Optional
 
 from config import env_config
 from database.db import DBConnection, DBOperations
-from external.CardGenerationAPI import (
-    CardGenerationAPI,
-    CardGenerationAPIInterface,
-    CardGenerationAPIMock,
+from external.CardGeneration import (
+    CardGenerationInterface,
+    CardGenerationMock,
 )
 from external.DeckServiceAPI import DeckServiceAPI
 from models.ModelConfig import ModelConfig
@@ -23,13 +22,9 @@ web_content_repo = DBOperations(WEBCONTENT_COLLECTION, db_connection)
 config_repo = DBOperations(OPENAI_CONFIG_COLLECTION, db_connection)
 
 model_config: Optional[ModelConfig] = None
+card_generation: Optional[CardGenerationInterface] = None
 
 deck_service = DeckServiceAPI(env_config)
-
-if env_config.ENV == "development":
-    card_generation_api: CardGenerationAPIInterface = CardGenerationAPIMock()
-else:
-    card_generation_api = CardGenerationAPI(env_config)
 
 
 def get_note_repo():
@@ -44,8 +39,8 @@ def get_web_content_repo():
     return web_content_repo
 
 
-def get_card_generation_api():
-    return card_generation_api
+def get_card_generation():
+    return card_generation
 
 
 def get_deck_service():

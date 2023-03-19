@@ -2,18 +2,19 @@ import logging
 from datetime import datetime
 from typing import Dict, List
 
+from fastapi import APIRouter, Depends, Request
+
 from config import env_config
 from database.db_interface import DBInterface
 from dependencies import (
-    get_card_generation_api,
+    get_card_generation,
     get_deck_service,
     get_model_config,
     get_note_repo,
     get_user_repo,
 )
-from external.CardGenerationAPI import CardGenerationAPIInterface
+from external.CardGeneration import CardGenerationInterface
 from external.DeckServiceAPI import DeckServiceAPIInterface
-from fastapi import APIRouter, Depends, Request
 from models.HttpModels import HTTPException
 from models.ModelConfig import ModelConfig
 from models.Note import (
@@ -29,8 +30,6 @@ from models.Note import (
 )
 from models.PyObjectID import PyObjectID
 from models.User import User
-from text_processing.post_processing import parse_completion
-from text_processing.pre_processing import encode_text, generate_prompt
 from util.limitier import limiter
 
 logger = logging.getLogger("logger")
@@ -72,8 +71,7 @@ async def generate_cards(
     userID: str,
     user_repo: DBInterface = Depends(get_user_repo),
     note_repo: DBInterface = Depends(get_note_repo),
-    card_generation_api: CardGenerationAPIInterface = Depends(get_card_generation_api),
-    model_config: ModelConfig = Depends(get_model_config),
+    generate_cards: CardGenerationInterface = Depends(get_card_generation),
 ):
     existing_open_ai_user: Dict = await user_repo.find_one({"user_id": userID})
 
@@ -88,28 +86,20 @@ async def generate_cards(
         open_ai_user_id = str(existing_open_ai_user["_id"])
 
     text = body.text
-    hash = encode_text(text)
 
-    prompt = generate_prompt(text=text, model_config=model_config)
-    completion = card_generation_api.generate_cards(
-        prompt=prompt, user_id=open_ai_user_id
-    )
-    parsed_qas = parse_completion(completion=completion)
+    generated_cards = generate_cards(text, open_ai_user_id)
 
     cards = Cards(
-        cards=parsed_qas,
+        cards=generated_cards,
         cards_added=False,
         original_cards=True,
         created_at=datetime.now().isoformat(),
     )
 
     document = Note(
-        encoding=hash,
         user_id=userID,
         deck_id=body.deck_id,
         text=text,
-        completion=completion,
-        prompt=prompt,
         cards_added=False,
         cards=[cards],
         created_at=datetime.now().isoformat(),
