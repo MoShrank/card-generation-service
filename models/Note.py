@@ -24,7 +24,6 @@ class Cards(BaseModel):
 
 class Note(MongoModel):
     id: PyObjectID = Field(default_factory=PyObjectID, alias="_id")
-    encoding: str
     user_id: str
     deck_id: str
     text: str

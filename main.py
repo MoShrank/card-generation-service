@@ -52,7 +52,9 @@ dictConfig(LogConfig().dict())
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    print("Starting up...")
     if env_config.ENV == "production":
+        print("Production environment detected")
         model_config_id = env_config.MODEL_CONFIG_ID
         model_config_obj_id = PyObjectID(model_config_id)
         model_config = await dependencies.config_repo.find_one(

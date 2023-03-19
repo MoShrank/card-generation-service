@@ -6,7 +6,7 @@ authors = ["Moritz Eich <hey@moritz.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-fastapi = "^0.75.0"
+fastapi = "0.95.0"
 openai = "0.27.0"
 python-dotenv = "^0.19.2"
 slowapi = "^0.1.5"
