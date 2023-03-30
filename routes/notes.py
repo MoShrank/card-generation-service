@@ -9,14 +9,12 @@ from database.db_interface import DBInterface
 from dependencies import (
     get_card_generation,
     get_deck_service,
-    get_model_config,
     get_note_repo,
     get_user_repo,
 )
 from external.CardGeneration import CardGenerationInterface
 from external.DeckServiceAPI import DeckServiceAPIInterface
 from models.HttpModels import HTTPException
-from models.ModelConfig import ModelConfig
 from models.Note import (
     AddedCardsResponse,
     Card,
@@ -89,8 +87,11 @@ async def generate_cards(
 
     generated_cards = generate_cards(text, open_ai_user_id)
 
+    # TODO get cards here
+    card_with_source = generated_cards
+
     cards = Cards(
-        cards=generated_cards,
+        cards=card_with_source,
         cards_added=False,
         original_cards=True,
         created_at=datetime.now().isoformat(),

@@ -16,6 +16,8 @@ uvicorn = {extras = ["standard"], version = "^0.17.6"}
 beautifulsoup4 = "^4.11.2"
 readability-lxml = "^0.8.1"
 httpx = "^0.23.3"
+torch = "^2.0.0"
+transformers = "^4.27.4"
 
 [tool.poetry.dev-dependencies]
 pip = "^22.0.4"
