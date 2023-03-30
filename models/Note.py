@@ -9,10 +9,15 @@ from models.MongoModel import MongoModel
 from models.PyObjectID import PyObjectID
 
 
-# MongoDB models
-class Card(BaseModel):
+class GPTCard(BaseModel):
     question: str = Field(min_length=1, strip_whitespace=True)
     answer: str = Field(min_length=1, strip_whitespace=True)
+
+
+# MongoDB models
+class Card(GPTCard):
+    source_start_index: int
+    source_end_index: int
 
 
 class Cards(BaseModel):
