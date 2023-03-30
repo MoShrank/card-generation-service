@@ -15,7 +15,7 @@ from models.WebContent import (
     WebContentRequest,
     WebContentResponse,
 )
-from text_processing.extract_info import extract_info
+from text.extract_info import extract_info
 from util.scraper import get_content
 
 logger = logging.getLogger("logger")
