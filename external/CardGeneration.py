@@ -5,7 +5,7 @@ from typing import Any, List
 import openai
 
 from models.ModelConfig import Example, ModelConfig
-from models.Note import Card
+from models.Note import GPTCard
 
 
 def retry_on_exception(exception, max_retries=3, sleep_time=5):
@@ -28,22 +28,22 @@ def retry_on_exception(exception, max_retries=3, sleep_time=5):
 
 class CardGenerationInterface(ABC):
     @abstractmethod
-    def __call__(self, text: str, user_id: str) -> List[Card]:
+    def __call__(self, text: str, user_id: str) -> List[GPTCard]:
         pass
 
 
 class CardGenerationMock(CardGenerationInterface):
-    def __call__(self, text: str, user_id: str) -> List[Card]:
+    def __call__(self, text: str, user_id: str) -> List[GPTCard]:
         return [
-            Card(
+            GPTCard(
                 question="What is the capital of the United States?",
                 answer="Washington D.C.",
             ),
-            Card(
+            GPTCard(
                 question="What is the capital of the United States?",
                 answer="Washington D.C.",
             ),
-            Card(
+            GPTCard(
                 question="What is the capital of the United States?",
                 answer="Washington D.C.",
             ),
@@ -57,7 +57,7 @@ class CardGeneration(CardGenerationInterface):
         openai.api_key = openai_api_key
         self._model_config = model_config
 
-    def __call__(self, text: str, user_id: str) -> List[Card]:
+    def __call__(self, text: str, user_id: str) -> List[GPTCard]:
         preprocessed_text = self.preprocess(text)
         prompt = self._generate_prompt(preprocessed_text)
         completion = self._generate_cards(prompt, user_id)
@@ -78,7 +78,7 @@ class CardGeneration(CardGenerationInterface):
             if len(split_qa) == 2:
                 question = split_qa[0].strip().replace("Q: ", "")
                 answer = split_qa[1].strip().replace("A: ", "")
-                card = Card(question=question, answer=answer)
+                card = GPTCard(question=question, answer=answer)
                 parsed_qas.append(card)
 
         return parsed_qas
@@ -98,7 +98,7 @@ class CardGeneration(CardGenerationInterface):
 
         return completion.choices[0].message["content"]
 
-    def _get_qa_text(self, qa: Card) -> str:
+    def _get_qa_text(self, qa: GPTCard) -> str:
         return "Q: " + qa.question + "\nA: " + qa.answer
 
     def _get_example_text(
