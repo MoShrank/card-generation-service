@@ -2,15 +2,16 @@ from datetime import datetime, timedelta
 from typing import List
 
 from bson.objectid import ObjectId
+from fastapi.testclient import TestClient
+
 from dependencies import (
+    get_card_generation,
     get_deck_service,
-    get_model_config,
     get_note_repo,
     get_user_repo,
 )
-from fastapi.testclient import TestClient
+from external.CardGeneration import CardGenerationMock
 from main import app
-from models.ModelConfig import ModelConfig, ModelParameters
 from models.Note import Card, DeckServiceCard
 from util.AttrDict import AttrDict
 
@@ -70,19 +71,6 @@ class UserRepoMock:
         pass
 
 
-def get_model_config_mock():
-    return ModelConfig(
-        prompt_prefix="",
-        card_prefix="",
-        note_prefix="",
-        type="",
-        parameters=ModelParameters(
-            temperature=0, engine="", max_tokens=0, top_p=0, n=0, stop_sequence=["###"]
-        ),
-        examples=[{"note": "text", "cards": []}],
-    )
-
-
 def get_user_repo_mock():
     return UserRepoMock()
 
@@ -100,10 +88,14 @@ def get_deck_service_mock():
     return DeckServiceAPIMock()
 
 
+def get_card_generation_mock():
+    return CardGenerationMock()
+
+
 app.dependency_overrides[get_note_repo] = get_note_repo_mock
 app.dependency_overrides[get_user_repo] = get_user_repo_mock
 app.dependency_overrides[get_deck_service] = get_deck_service_mock
-app.dependency_overrides[get_model_config] = get_model_config_mock
+app.dependency_overrides[get_card_generation] = get_card_generation_mock
 
 
 def test_get_notes():
@@ -132,7 +124,7 @@ def test_create_cards():
                 "answer": "Washington D.C.",
             },
         ]
-        * 5,
+        * 3,
     }
 
     data = {
@@ -150,7 +142,7 @@ def test_create_cards_exceed_char_limit():
     expected_status_code = 422
 
     data = {
-        "text": "t" * 1001,
+        "text": "t" * 3501,
         "deck_id": "1",
     }
 
