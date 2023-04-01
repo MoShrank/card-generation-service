@@ -8,8 +8,8 @@ def test_find_sentence_indices():
         {
             "text": "This is a test sentence. It contains a substring that we want to find. The substring is here.",
             "substring_start": 29,
-            "substring_end": 70,
-            "expected_output": (25, 45),
+            "substring_end": 38,
+            "expected_output": (25, 70),
         },
         {
             "text": "This is a test sentence. We want to find the sentence that starts with the substring",
