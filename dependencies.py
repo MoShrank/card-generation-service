@@ -26,7 +26,9 @@ card_generation: Optional[CardGenerationInterface] = None
 
 deck_service = DeckServiceAPI(env_config)
 
-card_source_generator = CardSourceGenerator()
+card_source_generator = (
+    CardSourceGenerator() if env_config.ENV == "production" else None
+)
 
 
 def get_note_repo():
