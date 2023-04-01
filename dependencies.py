@@ -4,10 +4,10 @@ from config import env_config
 from database.db import DBConnection, DBOperations
 from external.CardGeneration import (
     CardGenerationInterface,
-    CardGenerationMock,
 )
 from external.DeckServiceAPI import DeckServiceAPI
 from models.ModelConfig import ModelConfig
+from text.CardSourceGenerator import CardSourceGenerator
 
 NOTES_COLLECTION = "note"
 USER_COLLECTION = "openaiUser"
@@ -25,6 +25,8 @@ model_config: Optional[ModelConfig] = None
 card_generation: Optional[CardGenerationInterface] = None
 
 deck_service = DeckServiceAPI(env_config)
+
+card_source_generator = CardSourceGenerator()
 
 
 def get_note_repo():
@@ -49,3 +51,7 @@ def get_deck_service():
 
 def get_model_config():
     return model_config
+
+
+def get_card_source_generator():
+    return card_source_generator
