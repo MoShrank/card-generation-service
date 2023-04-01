@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from dependencies import (
     get_card_generation,
+    get_card_source_generator,
     get_deck_service,
     get_note_repo,
     get_user_repo,
@@ -33,14 +34,24 @@ class NoteRepoMock:
                         "created_at": datetime.now().isoformat(),
                         "cards_added": False,
                         "cards": [
-                            {"question": "late", "answer": "late"},
+                            {
+                                "question": "late",
+                                "answer": "late",
+                                "source_start_index": 0,
+                                "source_end_index": 4,
+                            },
                         ],
                     },
                     {
                         "created_at": (datetime.now() - timedelta(1)).isoformat(),
                         "cards_added": False,
                         "cards": [
-                            {"question": "early", "answer": "early"},
+                            {
+                                "question": "early",
+                                "answer": "early",
+                                "source_start_index": 0,
+                                "source_end_index": 4,
+                            },
                         ],
                     },
                 ],
@@ -84,6 +95,11 @@ class DeckServiceAPIMock:
         ]
 
 
+class CardSourceGeneratorMock:
+    def __call__(self, text: str, question: str):
+        return 0, 4
+
+
 def get_deck_service_mock():
     return DeckServiceAPIMock()
 
@@ -92,23 +108,35 @@ def get_card_generation_mock():
     return CardGenerationMock()
 
 
+def get_card_source_generator_mock():
+    return CardSourceGeneratorMock()
+
+
 app.dependency_overrides[get_note_repo] = get_note_repo_mock
 app.dependency_overrides[get_user_repo] = get_user_repo_mock
 app.dependency_overrides[get_deck_service] = get_deck_service_mock
 app.dependency_overrides[get_card_generation] = get_card_generation_mock
+app.dependency_overrides[get_card_source_generator] = get_card_source_generator_mock
 
 
 def test_get_notes():
     response = client.get("/notes?userID=1")
-    assert response.json()["data"] == {
+    expected_data = {
         "1": {
             "id": str(OBJECT_ID),
             "cards": [
-                {"question": "late", "answer": "late"},
+                {
+                    "question": "late",
+                    "answer": "late",
+                    "source_start_index": 0,
+                    "source_end_index": 4,
+                },
             ],
             "text": "text",
         }
     }
+
+    assert response.json()["data"] == expected_data
 
     assert response.status_code == 200
 
@@ -122,6 +150,8 @@ def test_create_cards():
             {
                 "question": "What is the capital of the United States?",
                 "answer": "Washington D.C.",
+                "source_start_index": 0,
+                "source_end_index": 4,
             },
         ]
         * 3,
@@ -133,7 +163,7 @@ def test_create_cards():
     }
     response = client.post(f"/notes?userID={str(OBJECT_ID)}", json=data)
     response_data = response.json()["data"]
-    print("response: ", response.json())
+
     assert response.status_code == expected_status_code
     assert response_data == expeceted_data
 
@@ -158,6 +188,8 @@ def test_update_cards():
             {
                 "question": "What is the capital of the United States?",
                 "answer": "Washington D.C.",
+                "source_start_index": 0,
+                "source_end_index": 4,
             },
         ],
     }
@@ -167,6 +199,8 @@ def test_update_cards():
             {
                 "question": "What is the capital of the United States?",
                 "answer": "Washington D.C.",
+                "source_start_index": 0,
+                "source_end_index": 4,
             },
         ],
     }

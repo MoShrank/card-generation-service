@@ -2,13 +2,13 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from models.Note import Card
+from models.Note import GPTCard
 from models.PyObjectID import PyObjectID
 
 
 class Example(BaseModel):
     note: str
-    cards: List[Card]
+    cards: List[GPTCard]
 
 
 class ModelParameters(BaseModel):

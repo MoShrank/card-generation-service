@@ -14,7 +14,7 @@ COPY . /app
 
 RUN pip install "poetry==1.2.0"
 
-RUN poetry config virtualenvs.create false && poetry install --no-dev
+RUN poetry config virtualenvs.create false && poetry install --only main
 
 CMD uvicorn main:app --host 0.0.0.0 --port ${PORT}
 

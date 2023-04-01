@@ -8,6 +8,7 @@ from config import env_config
 from database.db_interface import DBInterface
 from dependencies import (
     get_card_generation,
+    get_card_source_generator,
     get_deck_service,
     get_note_repo,
     get_user_repo,
@@ -28,6 +29,7 @@ from models.Note import (
 )
 from models.PyObjectID import PyObjectID
 from models.User import User
+from text.CardSourceGenerator import CardSourceGenerator
 from util.limitier import limiter
 
 logger = logging.getLogger("logger")
@@ -70,6 +72,7 @@ async def generate_cards(
     user_repo: DBInterface = Depends(get_user_repo),
     note_repo: DBInterface = Depends(get_note_repo),
     generate_cards: CardGenerationInterface = Depends(get_card_generation),
+    card_source_generator: CardSourceGenerator = Depends(get_card_source_generator),
 ):
     existing_open_ai_user: Dict = await user_repo.find_one({"user_id": userID})
 
@@ -87,11 +90,21 @@ async def generate_cards(
 
     generated_cards = generate_cards(text, open_ai_user_id)
 
-    # TODO get cards here
-    card_with_source = generated_cards
+    cards_with_source = []
+
+    for card in generated_cards:
+        start_index, end_index = card_source_generator(text, card.question)
+
+        card = Card(
+            **card.dict(),
+            source_start_index=start_index,
+            source_end_index=end_index,
+        )
+
+        cards_with_source.append(card)
 
     cards = Cards(
-        cards=card_with_source,
+        cards=cards_with_source,
         cards_added=False,
         original_cards=True,
         created_at=datetime.now().isoformat(),
