@@ -7,7 +7,7 @@ from external.CardGeneration import (
 )
 from external.DeckServiceAPI import DeckServiceAPI
 from models.ModelConfig import ModelConfig
-from text.CardSourceGenerator import CardSourceGenerator
+from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
 
 NOTES_COLLECTION = "note"
 USER_COLLECTION = "openaiUser"
@@ -27,7 +27,9 @@ card_generation: Optional[CardGenerationInterface] = None
 deck_service = DeckServiceAPI(env_config)
 
 card_source_generator = (
-    CardSourceGenerator() if env_config.ENV == "production" else None
+    CardSourceGenerator()
+    if env_config.ENV == "production"
+    else CardSourceGeneratorMock()
 )
 
 
