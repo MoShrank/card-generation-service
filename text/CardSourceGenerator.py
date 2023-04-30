@@ -7,6 +7,11 @@ from transformers import pipeline
 MODEL_PATH = os.environ.get("MODEL_PATH", "./qa_model")
 
 
+class CardSourceGeneratorMock:
+    def __call__(self, text: str, question: str) -> Tuple[int, int]:
+        return 0, len(text) // 2
+
+
 class CardSourceGenerator:
     def __init__(self) -> None:
         self._qa_model = pipeline(
@@ -15,7 +20,6 @@ class CardSourceGenerator:
 
     def __call__(self, text: str, question: str) -> Tuple[int, int]:
         answer = self._qa_model(question=question, context=text)
-        print(answer)
 
         start, end = self._find_sentence_indices(text, answer["start"], answer["end"])
         return start, end
