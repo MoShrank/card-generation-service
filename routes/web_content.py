@@ -55,7 +55,7 @@ async def create_post(
         raise HTTPException(
             status_code=500,
             message="Failed to scrape web page",
-            error="Failed sending request to deck service",
+            error="Failed to scrape web pag",
         )
 
     info = extract_info(raw_content)

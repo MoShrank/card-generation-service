@@ -19,6 +19,8 @@ httpx = "^0.23.3"
 torch = "^2.0.0"
 transformers = "^4.27.4"
 spacy = "^3.5.1"
+nltk = "^3.8.1"
+tiktoken = "^0.4.0"
 
 [tool.poetry.dev-dependencies]
 pip = "^22.0.4"

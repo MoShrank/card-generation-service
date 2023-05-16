@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from logging.config import dictConfig
 
@@ -14,10 +15,11 @@ from external.CardGeneration import (
     CardGenerationMock,
 )
 from models.HttpModels import HTTPException
-from models.ModelConfig import ModelConfig
+from models.ModelConfig import CardGenerationConfig, SummarizerConfig
 from models.PyObjectID import PyObjectID
 from routes.notes import router as notes_router
 from routes.web_content import router as web_content_router
+from text.Summarizer import Summarizer, SummarizerMock
 from util.limitier import limiter
 
 
@@ -50,25 +52,40 @@ class LogConfig(BaseModel):
 dictConfig(LogConfig().dict())
 
 
+def get_config(id: str):
+    object_id = PyObjectID(id)
+    config = dependencies.config_repo.find_one({"_id": object_id})
+
+    if not config:
+        logging.error(f"Could not find model config with id: {id}")
+        raise Exception(f"Could not find model config with id: {id}")
+
+    return config
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Starting up...")
+    logging.info("Starting up...")
     if env_config.ENV == "production":
-        print("Production environment detected")
-        model_config_id = env_config.MODEL_CONFIG_ID
-        model_config_obj_id = PyObjectID(model_config_id)
-        model_config = await dependencies.config_repo.find_one(
-            {"_id": model_config_obj_id}
-        )
-        if not model_config:
-            raise Exception(f"Could not find model config with id: {model_config_id}")
-        model_config = ModelConfig(**model_config)
+        logging.info("Production environment detected")
 
+        logging.info("Loading Card Generation model...")
+        model_config = get_config(env_config.MODEL_CONFIG_ID)
+        model_config = CardGenerationConfig(**model_config)
         dependencies.card_generation = CardGeneration(
             model_config, env_config.OPENAI_API_KEY
         )
+
+        logging.info("Loading Summarizer model...")
+        summarizer_model_config = get_config(env_config.SUMMARIZER_CONFIG_ID)
+        summarizer_model_config = SummarizerConfig(**summarizer_model_config)
+        dependencies.summarizer = Summarizer(
+            summarizer_model_config, env_config.OPENAI_API_KEY
+        )
+
     else:
         dependencies.card_generation = CardGenerationMock()
+        dependencies.summarizer = SummarizerMock()
 
     yield
 

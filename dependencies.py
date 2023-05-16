@@ -6,8 +6,9 @@ from external.CardGeneration import (
     CardGenerationInterface,
 )
 from external.DeckServiceAPI import DeckServiceAPI
-from models.ModelConfig import ModelConfig
+from models.ModelConfig import CardGenerationConfig, SummarizerConfig
 from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
+from text.Summarizer import SummarizerInterface
 
 NOTES_COLLECTION = "note"
 USER_COLLECTION = "openaiUser"
@@ -21,8 +22,11 @@ user_repo = DBOperations(USER_COLLECTION, db_connection)
 web_content_repo = DBOperations(WEBCONTENT_COLLECTION, db_connection)
 config_repo = DBOperations(OPENAI_CONFIG_COLLECTION, db_connection)
 
-model_config: Optional[ModelConfig] = None
+model_config: Optional[CardGenerationConfig] = None
 card_generation: Optional[CardGenerationInterface] = None
+
+summarizer_model_config: Optional[SummarizerConfig] = None
+summarizer: Optional[SummarizerInterface] = None
 
 deck_service = DeckServiceAPI(env_config)
 
@@ -43,6 +47,10 @@ def get_user_repo():
 
 def get_web_content_repo():
     return web_content_repo
+
+
+def get_summarizer():
+    return summarizer
 
 
 def get_card_generation():

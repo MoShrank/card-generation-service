@@ -1,29 +1,12 @@
-import time
 from abc import ABC, abstractmethod
 from typing import Any, List
 
 import openai
 
-from models.ModelConfig import Example, ModelConfig
+from external.gpt import get_chatgpt_completion
+from models.ModelConfig import CardGenerationConfig, Example, Message
 from models.Note import GPTCard
-
-
-def retry_on_exception(exception, max_retries=3, sleep_time=5):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            retries = 0
-            while retries < max_retries:
-                try:
-                    return func(*args, **kwargs)
-                except exception:
-                    retries += 1
-                    if retries == max_retries:
-                        raise
-                time.sleep(sleep_time)
-
-        return wrapper
-
-    return decorator
+from util.error import retry_on_exception
 
 
 class CardGenerationInterface(ABC):
@@ -51,9 +34,9 @@ class CardGenerationMock(CardGenerationInterface):
 
 
 class CardGeneration(CardGenerationInterface):
-    _model_config: ModelConfig
+    _model_config: CardGenerationConfig
 
-    def __init__(self, model_config: ModelConfig, openai_api_key: str) -> None:
+    def __init__(self, model_config: CardGenerationConfig, openai_api_key: str) -> None:
         openai.api_key = openai_api_key
         self._model_config = model_config
 
@@ -69,7 +52,6 @@ class CardGeneration(CardGenerationInterface):
         return text.replace("\n\n", "\n")
 
     def postprocess(self, completion: str) -> Any:
-        print(completion)
         qas = completion.split("\n\n")
 
         parsed_qas = []
@@ -85,18 +67,12 @@ class CardGeneration(CardGenerationInterface):
 
     @retry_on_exception(exception=openai.error.APIConnectionError)
     def _generate_cards(self, prompt: str, user_id: str) -> str:
-        completion = openai.ChatCompletion.create(
-            model=self._model_config.parameters.model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=self._model_config.parameters.temperature,
-            max_tokens=self._model_config.parameters.max_tokens,
-            top_p=self._model_config.parameters.top_p,
-            n=self._model_config.parameters.n,
-            stop=self._model_config.parameters.stop_sequence,
-            user=user_id,
+        messages = [Message(role="user", content=prompt)]
+        completion = get_chatgpt_completion(
+            self._model_config.parameters, messages, user_id
         )
 
-        return completion.choices[0].message["content"]
+        return completion
 
     def _get_qa_text(self, qa: GPTCard) -> str:
         return "Q: " + qa.question + "\nA: " + qa.answer
