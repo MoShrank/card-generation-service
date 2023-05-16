@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from pydantic import parse_obj_as
 
 from database.db_interface import DBInterface
-from dependencies import get_web_content_repo
+from dependencies import get_summarizer, get_web_content_repo
 from models import WebContent
 from models.HttpModels import HTTPException
 from models.WebContent import (
@@ -16,6 +16,7 @@ from models.WebContent import (
     WebContentResponse,
 )
 from text.extract_info import extract_info
+from text.Summarizer import SummarizerInterface
 from util.scraper import get_content
 
 logger = logging.getLogger("logger")
@@ -47,6 +48,7 @@ async def create_post(
     userID: str,
     body: WebContentRequest,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
+    summarizer: SummarizerInterface = Depends(get_summarizer),
 ) -> WebContentCreatedResponse:
     url = body.url
 
@@ -74,7 +76,7 @@ async def create_post(
     )
 
     if body.summarise:
-        web_content.summary = "TODO"
+        web_content.summary = summarizer(web_content.content, userID)
 
     await web_content_repo.insert_one(web_content.dict(by_alias=True))
 
