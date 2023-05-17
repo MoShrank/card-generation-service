@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from logging.config import dictConfig
 
+import nltk
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -65,6 +66,7 @@ async def get_config(id: str):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    nltk.download("punkt")
     logging.info("Starting up...")
     if env_config.ENV == "production":
         logging.info("Production environment detected")
