@@ -1,4 +1,4 @@
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -19,7 +19,7 @@ class ModelParameters(BaseModel):
     frequency_penalty: int = Field(default=0)
     top_p: int
     n: int
-    stop_sequence: List[str]
+    stop_sequence: Optional[List[str]]
 
 
 class Message(BaseModel):
