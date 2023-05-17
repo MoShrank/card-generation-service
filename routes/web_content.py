@@ -76,7 +76,17 @@ async def create_post(
     )
 
     if body.summarise:
-        web_content.summary = summarizer(web_content.content, userID)
+        try:
+            summary = summarizer(web_content.content, userID)
+        except Exception as e:
+            logger.error(e)
+            raise HTTPException(
+                status_code=500,
+                message="Failed to summarise web page",
+                error="Failed to summarise web page",
+            )
+
+        web_content.summary = summary
 
     await web_content_repo.insert_one(web_content.dict(by_alias=True))
 
