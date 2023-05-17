@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-import nltk
 import openai
+from nltk.tokenize import sent_tokenize
 
 from external.gpt import (
     calculate_chat_gpt_token_size,
@@ -100,7 +100,7 @@ class Summarizer(SummarizerInterface):
         """
 
         # Split the text into sentences
-        sentences = nltk.sent_tokenize(text)
+        sentences = sent_tokenize(text)
 
         chunks = []
         chunk = ""
