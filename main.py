@@ -2,7 +2,6 @@ import logging
 from contextlib import asynccontextmanager
 from logging.config import dictConfig
 
-import nltk
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -11,10 +10,7 @@ from slowapi.errors import RateLimitExceeded
 
 import dependencies
 from config import env_config
-from external.CardGeneration import (
-    CardGeneration,
-    CardGenerationMock,
-)
+from external.CardGeneration import CardGeneration, CardGenerationMock
 from models.HttpModels import HTTPException
 from models.ModelConfig import CardGenerationConfig, SummarizerConfig
 from models.PyObjectID import PyObjectID
