@@ -15,8 +15,15 @@ requests = "^2.27.1"
 uvicorn = {extras = ["standard"], version = "^0.17.6"}
 beautifulsoup4 = "^4.11.2"
 readability-lxml = "^0.8.1"
-torch = {version="^2.0.0", markers = { "sys_platform == 'darwin'" = [], "sys_platform != 'darwin'" = ["https://mirror.sjtu.edu.cn/pytorch-wheels/cpu-cxx11-abi/torch-2.0.0+cpu.cxx11.abi-cp311-cp311-linux_x86_64.whl"] }}
-
+torch = [
+    {
+        url="https://mirror.sjtu.edu.cn/pytorch-wheels/cpu-cxx11-abi/torch-2.0.0+cpu.cxx11.abi-cp311-cp311-linux_x86_64.whl", markers = "sys_platform != 'darwin'"
+    }
+    {
+        version="^2.0.0", markers = "sys_platform == 'darwin'"
+    }
+    
+]
 transformers = "^4.27.4"
 nltk = "^3.8.1"
 tiktoken = "^0.4.0"
