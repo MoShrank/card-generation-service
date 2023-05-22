@@ -1,5 +1,5 @@
-from readability import Document
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
+from readability import Document  # type: ignore
 
 remove_words = ["\n", "\r", "\\n", "\\r"]
 

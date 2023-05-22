@@ -3,6 +3,8 @@ from pydantic import BaseSettings, Field
 
 
 class EnvConfig(BaseSettings):
+    PORT: int = Field(8000, env="PORT")
+    LOG_LEVEL: str = Field("INFO", env="LOG_LEVEL")
     OPENAI_API_KEY: str = Field(None, env="OPENAI_API_KEY")
     MONGO_DB_CONNECTION: str = Field(
         "mongodb://127.0.0.1:27017", env="MONGO_DB_CONNECTION"
@@ -19,4 +21,4 @@ class EnvConfig(BaseSettings):
 
 
 load_dotenv(find_dotenv())
-env_config = EnvConfig()
+env_config = EnvConfig()  # type: ignore

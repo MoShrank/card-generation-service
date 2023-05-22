@@ -1,8 +1,8 @@
 from typing import Dict
 
-import motor.motor_asyncio  # type: ignore
-from config import env_config
+import motor.motor_asyncio
 
+from config import env_config
 from database.db_interface import DBInterface
 
 

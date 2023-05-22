@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 import openai
-from nltk.tokenize import sent_tokenize
+from nltk.tokenize import sent_tokenize  # type: ignore
 
 from external.gpt import (
     calculate_chat_gpt_token_size,

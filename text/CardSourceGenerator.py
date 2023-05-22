@@ -2,9 +2,9 @@ import os
 import re
 from typing import Tuple
 
-from transformers import pipeline
+from transformers import pipeline  # type: ignore
 
-MODEL_PATH = os.environ.get("MODEL_PATH", "./qa_model")
+MODEL_PATH = os.environ.get("MODEL_PATH", "./distilbert-base-cased-distilled-squad")
 
 
 class CardSourceGeneratorMock:
@@ -19,7 +19,7 @@ class CardSourceGenerator:
         )
 
     def __call__(self, text: str, question: str) -> Tuple[int, int]:
-        answer = self._qa_model(question=question, context=text)
+        answer = self._qa_model(question=question, context=text)  # type: ignore
 
         start, end = self._find_sentence_indices(text, answer["start"], answer["end"])
         return start, end

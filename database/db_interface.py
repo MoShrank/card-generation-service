@@ -4,17 +4,17 @@ from typing import Dict
 
 class DBInterface(ABC):
     @abstractmethod
-    async def insert_one(self, document: Dict):
+    async def insert_one(self, document: Dict) -> Dict:
         pass
 
     @abstractmethod
-    async def query(self, query: Dict):
+    async def query(self, query: Dict) -> Dict:
         pass
 
     @abstractmethod
-    async def find_one(self, query: Dict):
+    async def find_one(self, query: Dict) -> Dict:
         pass
 
     @abstractmethod
-    async def update_one(self, query: Dict, update: Dict):
+    async def update_one(self, query: Dict, update: Dict) -> Dict:
         pass

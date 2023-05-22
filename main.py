@@ -1,10 +1,8 @@
 import logging
 from contextlib import asynccontextmanager
-from logging.config import dictConfig
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -19,61 +17,40 @@ from routes.web_content import router as web_content_router
 from text.Summarizer import Summarizer, SummarizerMock
 from util.limitier import limiter
 
-
-class LogConfig(BaseModel):
-    LOGGER_NAME: str = "logger"
-    LOG_FORMAT: str = "%(levelprefix)s | %(asctime)s | %(message)s"
-    LOG_LEVEL: str = "DEBUG"
-
-    version = 1
-    disable_existing_loggers = False
-    formatters = {
-        "default": {
-            "()": "uvicorn.logging.DefaultFormatter",
-            "fmt": LOG_FORMAT,
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        },
-    }
-    handlers = {
-        "default": {
-            "formatter": "default",
-            "class": "logging.StreamHandler",
-            "stream": "ext://sys.stderr",
-        },
-    }
-    loggers = {
-        "logger": {"handlers": ["default"], "level": LOG_LEVEL},
-    }
-
-
-dictConfig(LogConfig().dict())
+uvicorn_logger = logging.getLogger("uvicorn")
+uvicorn_logger.propagate = False
+logging_format = "%(levelname)s - %(asctime)s - %(message)s"
+logging.basicConfig(level=env_config.LOG_LEVEL, format=logging_format)
+logger = logging.getLogger(__name__)
 
 
 async def get_config(id: str):
     object_id = PyObjectID(id)
-    config = await dependencies.config_repo.find_one({"_id": object_id})
+    config = await dependencies.get_config_repo().find_one({"_id": object_id})
 
     if not config:
-        logging.error(f"Could not find model config with id: {id}")
+        logger.error(f"Could not find model config with id: {id}")
         raise Exception(f"Could not find model config with id: {id}")
 
     return config
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    logging.info("Starting up...")
+async def lifespan(
+    app: FastAPI,
+):
+    logger.info("Starting up...")
     if env_config.ENV == "production":
-        logging.info("Production environment detected")
+        logger.info("Production environment detected")
 
-        logging.info("Loading Card Generation model...")
+        logger.info("Loading Card Generation model...")
         model_config = await get_config(env_config.MODEL_CONFIG_ID)
         model_config = CardGenerationConfig(**model_config)
         dependencies.card_generation = CardGeneration(
             model_config, env_config.OPENAI_API_KEY
         )
 
-        logging.info("Loading Summarizer model...")
+        logger.info("Loading Summarizer model...")
         summarizer_model_config = await get_config(env_config.SUMMARIZER_CONFIG_ID)
         summarizer_model_config = SummarizerConfig(**summarizer_model_config)
         dependencies.summarizer = Summarizer(
@@ -81,6 +58,8 @@ async def lifespan(app: FastAPI):
         )
 
     else:
+        logger.info("Development environment detected")
+
         dependencies.card_generation = CardGenerationMock()
         dependencies.summarizer = SummarizerMock()
 
@@ -108,3 +87,9 @@ async def http_exception_handler(request, exception: HTTPException):
 @app.get("/ping")
 async def ping():
     return {"ping": "pong!"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
