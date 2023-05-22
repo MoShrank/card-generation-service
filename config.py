@@ -1,10 +1,10 @@
 from dotenv import find_dotenv, load_dotenv
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, validator
 
 
 class EnvConfig(BaseSettings):
     PORT: int = Field(8000, env="PORT")
-    LOG_LEVEL: str = Field("INFO", env="LOG_LEVEL")
+    LOG_LEVEL: str = Field("info", env="LOG_LEVEL")
     OPENAI_API_KEY: str = Field(None, env="OPENAI_API_KEY")
     MONGO_DB_CONNECTION: str = Field(
         "mongodb://127.0.0.1:27017", env="MONGO_DB_CONNECTION"
@@ -18,6 +18,10 @@ class EnvConfig(BaseSettings):
     MODEL_CONFIG_ID: str = Field(None, env="MODEL_CONFIG_ID")
     SUMMARIZER_CONFIG_ID: str = Field(None, env="SUMMARIZER_CONFIG_ID")
     MAX_TEXT_LENGTH: int = Field(1000, env="MAX_TEXT_LENGTH")
+
+    @validator("LOG_LEVEL", pre=True)
+    def transform_log_level(cls, log_level):
+        return log_level.upper()
 
 
 load_dotenv(find_dotenv())
