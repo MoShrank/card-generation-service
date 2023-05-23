@@ -1,3 +1,4 @@
+import logging
 from typing import Dict
 
 import motor.motor_asyncio
@@ -5,19 +6,28 @@ import motor.motor_asyncio
 from config import env_config
 from database.db_interface import DBInterface
 
+logger = logging.getLogger(__name__)
+
 
 class DBConnection:
-    MAX_CONNECTION_TIME = 5
+    MAX_CONNECTION_TIME = 5000
 
     def __init__(self, db_name: str):
         try:
             client = motor.motor_asyncio.AsyncIOMotorClient(
                 env_config.MONGO_DB_CONNECTION,
-                connectTimeoutMS=self.MAX_CONNECTION_TIME,
+                serverSelectionTimeoutMS=self.MAX_CONNECTION_TIME,
             )
-            client.server_info()
             self._db = client[db_name]
         except Exception as e:
+            logger.error("MongoDB connection error!")
+            raise Exception("MongoDB connection error!", e)
+
+    async def wait_for_connection(self):
+        try:
+            await self._db.command("ismaster")
+        except Exception as e:
+            logger.error("MongoDB connection error!")
             raise Exception("MongoDB connection error!", e)
 
     def get_db(self) -> motor.motor_asyncio.AsyncIOMotorDatabase:

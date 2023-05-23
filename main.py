@@ -8,6 +8,7 @@ from slowapi.errors import RateLimitExceeded
 
 import dependencies
 from config import env_config
+from database.db import DBConnection
 from external.CardGeneration import CardGeneration, CardGenerationMock
 from models.HttpModels import HTTPException
 from models.ModelConfig import CardGenerationConfig, SummarizerConfig
@@ -40,6 +41,10 @@ async def lifespan(
     app: FastAPI,
 ):
     logger.info("Starting up...")
+
+    logger.info("Connecting to database...")
+    await dependencies.db_conn.wait_for_connection()
+
     if env_config.ENV == "production":
         logger.info("Production environment detected")
 
@@ -90,6 +95,6 @@ async def ping():
 
 
 if __name__ == "__main__":
-    import uvicorn
+    import uvicorn  # type: ignore
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # type: ignore

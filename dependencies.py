@@ -31,13 +31,15 @@ card_source_generator = (
     else CardSourceGeneratorMock()
 )
 
+db_conn = DBConnection(env_config.DATABASE)
+
 
 def get_db_connection():
-    return DBConnection(env_config.DATABASE)
+    return db_conn
 
 
 def get_config_repo():
-    db_connection = DBConnection(env_config.DATABASE)
+    db_connection = get_db_connection()
     return DBOperations(OPENAI_CONFIG_COLLECTION, db_connection)
 
 
