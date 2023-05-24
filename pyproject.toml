@@ -20,6 +20,7 @@ nltk = "^3.8.1"
 tiktoken = "^0.4.0"
 torch = [{version="^2.0.0", markers = "platform_machine == 'aarch64'"},
 {url="https://mirror.sjtu.edu.cn/pytorch-wheels/cpu-cxx11-abi/torch-2.0.0+cpu.cxx11.abi-cp311-cp311-linux_x86_64.whl", markers = "platform_machine == 'x86_64'"}]
+httpx = "^0.24.1"
 
 
 [tool.poetry.dev-dependencies]
