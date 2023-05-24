@@ -1,15 +1,15 @@
 import logging
 from datetime import datetime
-from typing import Dict, List
+from typing import List
 
 from fastapi import APIRouter, Depends
 from pydantic import parse_obj_as
 
 from database.db_interface import DBInterface
 from dependencies import get_summarizer, get_web_content_repo
-from models import WebContent
 from models.HttpModels import HTTPException
 from models.WebContent import (
+    WebContent,
     WebContentCreatedResponse,
     WebContentData,
     WebContentRequest,
@@ -19,7 +19,7 @@ from text.extract_info import extract_info
 from text.Summarizer import SummarizerInterface
 from util.scraper import get_content
 
-logger = logging.getLogger("logger")
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(
@@ -28,13 +28,16 @@ router = APIRouter(
 )
 
 
-@router.get("/post")
+@router.get(
+    "/post",
+    response_model_by_alias=False,
+    response_model=WebContentResponse,
+)
 async def get_posts(
     userID: str,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
 ) -> WebContentResponse:
-    webContentDB: List[Dict] = await web_content_repo.query({"user_id": userID})
-
+    webContentDB = await web_content_repo.query({"user_id": userID})
     webpages = parse_obj_as(List[WebContentData], webContentDB)
 
     return WebContentResponse(
@@ -43,7 +46,11 @@ async def get_posts(
     )
 
 
-@router.post("/post")
+@router.post(
+    "/post",
+    response_model_by_alias=False,
+    response_model=WebContentCreatedResponse,
+)
 async def create_post(
     userID: str,
     body: WebContentRequest,
@@ -64,20 +71,11 @@ async def create_post(
 
     now = datetime.now()
 
-    web_content = WebContent.WebContent(
-        user_id=userID,
-        url=url,
-        name=body.name,
-        title=info["title"],
-        content=info["content"],
-        summarise=body.summarise,
-        created_at=now,
-        updated_at=now,
-    )
+    summary = None
 
     if body.summarise:
         try:
-            summary = summarizer(web_content.content, userID)
+            summary = summarizer(info["content"], userID)
         except Exception as e:
             logger.error(e)
             raise HTTPException(
@@ -86,13 +84,26 @@ async def create_post(
                 error="Failed to summarise web page",
             )
 
-        web_content.summary = summary
+    web_content = WebContent(
+        user_id=userID,
+        url=url,
+        name=body.name,
+        title=info["title"],
+        content=info["content"],
+        summarise=body.summarise,
+        created_at=now,
+        updated_at=now,
+        deleted_at=None,
+        summary=summary,
+        thumbnail=None,
+    )
 
-    await web_content_repo.insert_one(web_content.dict(by_alias=True))
+    result = await web_content_repo.insert_one(web_content.dict(by_alias=True))
 
     webContent = WebContentData(
+        _id=result.inserted_id,
         url=web_content.url,
-        summary=web_content.summarise,
+        summary=web_content.summary,
         name=web_content.name,
         created_at=web_content.created_at,
     )
