@@ -1,4 +1,8 @@
+import os
+
 from text.CardSourceGenerator import CardSourceGenerator
+
+os.environ["MODEL_PATH"] = "../distilbert-base-cased-distilled-squad"
 
 
 def test_find_sentence_indices():

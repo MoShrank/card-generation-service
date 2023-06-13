@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -20,20 +20,15 @@ class Card(GPTCard):
     source_end_index: int
 
 
-class Cards(BaseModel):
-    cards: List[Card]
-    cards_added: bool
-    original_cards: bool
-    created_at: datetime
-
-
 class Note(MongoModel):
     id: PyObjectID = Field(default_factory=PyObjectID, alias="_id")
     user_id: str
     deck_id: str
     text: str
     cards_added: bool
-    cards: List[Cards]
+    cards_edited: bool
+    cards: List[Card]
+    cards_edited_at: Optional[datetime]
     created_at: datetime
 
 

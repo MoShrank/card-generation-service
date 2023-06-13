@@ -29,30 +29,15 @@ class NoteRepoMock:
                 "user_id": "1",
                 "deck_id": "1",
                 "text": "text",
+                "cards_added": False,
+                "cards_edited": False,
+                "cards_edited_at": None,
                 "cards": [
                     {
-                        "created_at": datetime.now().isoformat(),
-                        "cards_added": False,
-                        "cards": [
-                            {
-                                "question": "late",
-                                "answer": "late",
-                                "source_start_index": 0,
-                                "source_end_index": 4,
-                            },
-                        ],
-                    },
-                    {
-                        "created_at": (datetime.now() - timedelta(1)).isoformat(),
-                        "cards_added": False,
-                        "cards": [
-                            {
-                                "question": "early",
-                                "answer": "early",
-                                "source_start_index": 0,
-                                "source_end_index": 4,
-                            },
-                        ],
+                        "question": "late",
+                        "answer": "late",
+                        "source_start_index": 0,
+                        "source_end_index": 4,
                     },
                 ],
             },
@@ -130,7 +115,7 @@ def test_get_notes():
                     "answer": "late",
                     "source_start_index": 0,
                     "source_end_index": 4,
-                },
+                }
             ],
             "text": "text",
         }

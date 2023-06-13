@@ -19,7 +19,6 @@ from models.HttpModels import HTTPException
 from models.Note import (
     AddedCardsResponse,
     Card,
-    Cards,
     CardsResponse,
     GenerateCardsRequest,
     Note,
@@ -42,20 +41,12 @@ router = APIRouter(
 )
 
 
-def get_latest_cards_from_note(note: Dict) -> List[Card]:
-    cards = sorted(note["cards"], key=lambda x: x["created_at"], reverse=True)[0][
-        "cards"
-    ]
-
-    return cards
-
-
 def map_notes_to_deck(notes: List[Dict]) -> Dict[str, Dict]:
     notes_by_deck_id: Dict[str, Dict] = {}
 
     for note in notes:
         deck_id = note["deck_id"]
-        cards = get_latest_cards_from_note(note)
+        cards = note["cards"]
 
         notes_by_deck_id[deck_id] = {**note, "id": str(note["_id"]), "cards": cards}
 
@@ -103,28 +94,25 @@ async def generate_cards(
 
         cards_with_source.append(card)
 
-    cards = Cards(
-        cards=cards_with_source,
-        cards_added=False,
-        original_cards=True,
-        created_at=datetime.now().isoformat(),
-    )
+    now = datetime.now().isoformat()
 
-    document = Note(
+    note = Note(
         user_id=userID,
         deck_id=body.deck_id,
         text=text,
         cards_added=False,
-        cards=[cards],
-        created_at=datetime.now().isoformat(),
+        cards=cards_with_source,
+        card_edited_at=None,
+        cards_edited=False,
+        created_at=now,
     ).dict(by_alias=True)
 
-    insertion_result = await note_repo.insert_one(document)
+    insertion_result = await note_repo.insert_one(note)
     note_id = str(insertion_result.inserted_id)
 
-    document["id"] = note_id
+    note["id"] = note_id
 
-    return CardsResponse(message="success", data={**document, "cards": cards.cards})
+    return CardsResponse(message="success", data={**note})
 
 
 @router.post(
@@ -151,7 +139,7 @@ async def add_cards(
             status_code=409, message="Failed to save cards", error="Cards Already added"
         )
 
-    cards = get_latest_cards_from_note(note)
+    cards = note["cards"]
 
     try:
         cards = deck_service.save_cards(user_id=userID, deck_id=deck_id, cards=cards)
@@ -160,7 +148,7 @@ async def add_cards(
         raise HTTPException(
             status_code=500,
             message="Failed to save cards",
-            error=f"Failed sending request to deck service",
+            error="Failed sending request to deck service",
         )
 
     await note_repo.update_one(
@@ -178,19 +166,16 @@ async def update_cards(
     userID: str,
     note_repo: DBInterface = Depends(get_note_repo),
 ):
-    cards = Cards(
-        cards=body.cards,
-        cards_added=False,
-        original_cards=False,
-        created_at=datetime.now().isoformat(),
-    )
+    new_cards = body.cards
+    now = datetime.now().isoformat()
 
     await note_repo.update_one(
-        {"_id": PyObjectID(id), "user_id": userID}, {"$push": {"cards": cards.dict()}}
+        {"_id": PyObjectID(id), "user_id": userID},
+        {"$set": {"cards": new_cards, "card_edited_at": now, "cards_edited": True}},
     )
 
     return UpdatedCardsResponse(
-        message="Successfully updated cards", data={"cards": cards.cards}
+        message="Successfully updated cards", data={"cards": new_cards}
     )
 
 
