@@ -9,6 +9,10 @@ class BaseResponse(BaseModel, ABC):
     data: Any
 
 
+class EmptyResponse(BaseModel):
+    message: str
+
+
 class HTTPException(Exception):
     def __init__(self, status_code: int, message: str, error: str):
         self.status_code = status_code

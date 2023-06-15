@@ -54,3 +54,6 @@ class DBOperations(DBInterface):
 
     async def update_one(self, query, update: Dict):
         return await self._collection.update_one(query, update)
+
+    async def delete_one(self, query):
+        return await self._collection.delete_one(query)

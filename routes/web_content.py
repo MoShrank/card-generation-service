@@ -7,7 +7,8 @@ from pydantic import parse_obj_as
 
 from database.db_interface import DBInterface
 from dependencies import get_summarizer, get_web_content_repo
-from models.HttpModels import HTTPException
+from models.HttpModels import EmptyResponse, HTTPException
+from models.PyObjectID import PyObjectID
 from models.WebContent import (
     WebContent,
     WebContentCreatedResponse,
@@ -23,13 +24,13 @@ logger = logging.getLogger(__name__)
 
 
 router = APIRouter(
-    prefix="/web-content",
+    prefix="/post",
     tags=["web-content", "scraping"],
 )
 
 
 @router.get(
-    "/post",
+    "",
     response_model_by_alias=False,
     response_model=WebContentResponse,
 )
@@ -47,7 +48,7 @@ async def get_posts(
 
 
 @router.post(
-    "/post",
+    "",
     response_model_by_alias=False,
     response_model=WebContentCreatedResponse,
 )
@@ -109,3 +110,27 @@ async def create_post(
     )
 
     return WebContentCreatedResponse(message="succes", data=webContent)
+
+
+@router.delete(
+    "/{postID}",
+    response_model_by_alias=False,
+    response_model=EmptyResponse,
+)
+async def delete_post(
+    userID: str,
+    postID: str,
+    web_content_repo: DBInterface = Depends(get_web_content_repo),
+) -> EmptyResponse:
+    result = await web_content_repo.delete_one(
+        {"_id": PyObjectID(postID), "user_id": userID}
+    )
+
+    if result.deleted_count == 0:
+        raise HTTPException(
+            status_code=404,
+            message="Failed to delete web page",
+            error="Web page not found",
+        )
+
+    return EmptyResponse(message="succes")

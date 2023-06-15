@@ -64,7 +64,7 @@ app.dependency_overrides[get_web_content_repo] = get_web_content_repo_mock
 
 
 def test_get_posts(test_user_id, test_web_content_request):
-    response = client.get(f"/web-content/post?userID={test_user_id}")
+    response = client.get(f"/post?userID={test_user_id}")
 
     data = response.json()["data"]
 
