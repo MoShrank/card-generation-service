@@ -1,3 +1,4 @@
+import re
 from abc import ABC, abstractmethod
 from typing import List
 
@@ -43,9 +44,18 @@ class Summarizer(SummarizerInterface):
             chunk_summary = self._get_completion(chunk, user_id)
             summaries.append(chunk_summary)
 
-        summary = "\n".join(summaries)
+        summary = self._postprocess(summaries)
 
         return summary
+
+    def _postprocess(self, summaries: List[str]) -> str:
+        summaries = [
+            summary
+            for summary in summaries
+            if not re.search(r"\bnone\b", summary, re.IGNORECASE)
+        ]
+
+        return "\n".join(summaries)
 
     def _get_target_size(self) -> int:
         messages = self._generate_messages("")
