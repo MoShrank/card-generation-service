@@ -6,18 +6,27 @@ from fastapi import APIRouter, Depends
 from pydantic import parse_obj_as
 
 from database.db_interface import DBInterface
-from dependencies import get_summarizer, get_web_content_repo
+from dependencies import (
+    get_question_answer_gpt,
+    get_summarizer,
+    get_vector_store,
+    get_web_content_repo,
+)
 from models.HttpModels import EmptyResponse, HTTPException
 from models.PyObjectID import PyObjectID
 from models.WebContent import (
     WebContent,
     WebContentCreatedResponse,
     WebContentData,
+    WebContentQA,
+    WebContentQAResponse,
     WebContentRequest,
     WebContentResponse,
 )
 from text.extract_info import extract_info
+from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.Summarizer import SummarizerInterface
+from text.VectorStore import VectorStore
 from util.scraper import get_content
 
 logger = logging.getLogger(__name__)
@@ -57,6 +66,7 @@ async def create_post(
     body: WebContentRequest,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
     summarizer: SummarizerInterface = Depends(get_summarizer),
+    vector_store: VectorStore = Depends(get_vector_store),
 ) -> WebContentCreatedResponse:
     url = body.url
 
@@ -67,8 +77,15 @@ async def create_post(
             message="Failed to scrape web page",
             error="Failed to scrape web pag",
         )
-
-    info = extract_info(raw_content)
+    try:
+        info = extract_info(raw_content)
+    except Exception as e:
+        logger.error(f"Failed to extract info from webpage. Error: {e}")
+        raise HTTPException(
+            status_code=500,
+            message="Failed to scrape web page",
+            error="Failed to scrape web pag",
+        )
 
     now = datetime.now()
 
@@ -109,6 +126,10 @@ async def create_post(
         created_at=web_content.created_at,
     )
 
+    vector_store.add_document(
+        info["content"], {"user_id": userID, "source_id": result.inserted_id}
+    )
+
     return WebContentCreatedResponse(message="succes", data=webContent)
 
 
@@ -134,3 +155,51 @@ async def delete_post(
         )
 
     return EmptyResponse(message="succes")
+
+
+@router.get(
+    "/{postID}/answer",
+    response_model=WebContentQAResponse,
+)
+async def get_answer(
+    userID: str,
+    postID: str,
+    question: str,
+    web_content_repo: DBInterface = Depends(get_web_content_repo),
+    vector_store: VectorStore = Depends(get_vector_store),
+    qa_gpt: QuestionAnswerGPTInterface = Depends(get_question_answer_gpt),
+) -> WebContentQAResponse:
+    web_content = await web_content_repo.find_one(
+        {"_id": PyObjectID(postID), "user_id": userID}
+    )
+
+    if not web_content:
+        raise HTTPException(
+            status_code=404,
+            message="Failed to get answer",
+            error="Web page not found",
+        )
+
+    filter = {
+        "user_id": userID,
+        "source_id": postID,
+    }
+
+    documents = vector_store.query(web_content["content"], filter)
+
+    if not documents:
+        raise HTTPException(
+            status_code=404,
+            message="Failed to get answer",
+            error="No documents found",
+        )
+
+    answer = qa_gpt(documents, question, userID)
+
+    return WebContentQAResponse(
+        message="success",
+        data=WebContentQA(
+            answer=answer,
+            documents=documents,
+        ),
+    )

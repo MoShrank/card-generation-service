@@ -8,9 +8,17 @@ from external.CardGeneration import (
     CardGenerationInterface,
 )
 from external.DeckServiceAPI import DeckServiceAPI
-from models.ModelConfig import CardGenerationConfig, SummarizerConfig
+from models.ModelConfig import (
+    CardGenerationConfig,
+    QuestionAnswerGPTConfig,
+    SummarizerConfig,
+)
 from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
+from text.chroma_client import chroma_client
+from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.Summarizer import SummarizerInterface
+from text.TextSplitter import TextSplitter
+from text.VectorStore import VectorStore
 
 NOTES_COLLECTION = "note"
 USER_COLLECTION = "openaiUser"
@@ -22,6 +30,12 @@ card_generation: Optional[CardGenerationInterface] = None
 
 summarizer_model_config: Optional[SummarizerConfig] = None
 summarizer: Optional[SummarizerInterface] = None
+
+question_answer_gpt_config: Optional[QuestionAnswerGPTConfig] = None
+question_answer_gpt: Optional[QuestionAnswerGPTInterface] = None
+
+text_splitter = TextSplitter(1000, 70)
+vector_store = VectorStore(text_splitter, chroma_client, 3)
 
 deck_service = DeckServiceAPI(env_config)
 
@@ -73,3 +87,11 @@ def get_model_config():
 
 def get_card_source_generator():
     return card_source_generator
+
+
+def get_question_answer_gpt():
+    return question_answer_gpt
+
+
+def get_vector_store():
+    return vector_store

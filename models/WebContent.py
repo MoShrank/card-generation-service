@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from bson import ObjectId
 from pydantic import BaseModel
@@ -40,7 +40,7 @@ class WebContentData(BaseModel):
 
 
 class WebContentResponse(BaseResponse):
-    data: List[WebContentData]
+    data: list[WebContentData]
 
 
 class WebContentCreatedResponse(BaseResponse):
@@ -51,3 +51,12 @@ class WebContentRequest(BaseModel):
     name: str
     url: str
     summarise: bool
+
+
+class WebContentQA(BaseModel):
+    answer: str
+    documents: list[str]
+
+
+class WebContentQAResponse(BaseResponse):
+    data: WebContentQA

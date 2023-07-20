@@ -65,7 +65,7 @@ class CardGeneration(CardGenerationInterface):
 
         return parsed_qas
 
-    @retry_on_exception(exception=openai.error.APIConnectionError)
+    @retry_on_exception(exception=Exception)
     def _generate_cards(self, prompt: str, user_id: str) -> str:
         messages = [Message(role="user", content=prompt)]
         completion = get_chatgpt_completion(
@@ -99,12 +99,18 @@ class CardGeneration(CardGenerationInterface):
     def _generate_prompt(self, text: str) -> str:
         examples_text = ""
 
+        stop_sequence = (
+            self._model_config.parameters.stop_sequence[0]
+            if self._model_config.parameters.stop_sequence
+            else ""
+        )
+
         if len(self._model_config.examples):
             examples_text = "\n\n".join(
                 [
                     self._get_example_text(
                         example,
-                        self._model_config.parameters.stop_sequence[0],
+                        stop_sequence,
                         self._model_config.card_prefix,
                         self._model_config.note_prefix,
                     )
@@ -112,7 +118,7 @@ class CardGeneration(CardGenerationInterface):
                 ]
             )
 
-            examples_text += "\n\n" + self._model_config.parameters.stop_sequence[0]
+            examples_text += "\n\n" + stop_sequence
 
         prompt = (
             self._model_config.prompt_prefix

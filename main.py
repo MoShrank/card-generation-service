@@ -8,13 +8,18 @@ from slowapi.errors import RateLimitExceeded
 
 import dependencies
 from config import env_config
-from database.db import DBConnection
 from external.CardGeneration import CardGeneration, CardGenerationMock
 from models.HttpModels import HTTPException
-from models.ModelConfig import CardGenerationConfig, SummarizerConfig
+from models.ModelConfig import (
+    CardGenerationConfig,
+    QuestionAnswerGPTConfig,
+    SummarizerConfig,
+)
 from models.PyObjectID import PyObjectID
 from routes.notes import router as notes_router
 from routes.web_content import router as web_content_router
+from text.chroma_client import import_data, wait_for_chroma_connection
+from text.QuestionAnswerGPT import QuestionAnswerGPT
 from text.Summarizer import Summarizer, SummarizerMock
 from util.limitier import limiter
 
@@ -42,8 +47,14 @@ async def lifespan(
 ):
     logger.info("Starting up...")
 
-    logger.info("Connecting to database...")
+    logger.info("Connecting to MongoDB...")
     await dependencies.db_conn.wait_for_connection()
+
+    logger.info("Connecting to ChromaDB...")
+    await wait_for_chroma_connection(5)
+
+    logger.info("Importing data to ChromaDB...")
+    await import_data()
 
     if env_config.ENV == "production":
         logger.info("Production environment detected")
@@ -60,6 +71,13 @@ async def lifespan(
         summarizer_model_config = SummarizerConfig(**summarizer_model_config)
         dependencies.summarizer = Summarizer(
             summarizer_model_config, env_config.OPENAI_API_KEY
+        )
+
+        logger.info("Loading Question Answer GPT model...")
+        qagpt_model_config = await get_config(env_config.QAGPT_CONFIG_ID)
+        qagpt_model_config = QuestionAnswerGPTConfig(**qagpt_model_config)
+        dependencies.question_answer_gpt = QuestionAnswerGPT(
+            qagpt_model_config, env_config.OPENAI_API_KEY
         )
 
     else:

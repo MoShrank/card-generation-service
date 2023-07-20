@@ -18,6 +18,9 @@ class EnvConfig(BaseSettings):
     MODEL_CONFIG_ID: str = Field(None, env="MODEL_CONFIG_ID")
     SUMMARIZER_CONFIG_ID: str = Field(None, env="SUMMARIZER_CONFIG_ID")
     MAX_TEXT_LENGTH: int = Field(1000, env="MAX_TEXT_LENGTH")
+    CHROMA_HOST: str = Field("localhost", env="CHROMA_HOST")
+    CHROMA_PORT: str = Field("8000", env="CHROMA_PORT")
+    QAGPT_CONFIG_ID: str = Field(None, env="QAGPT_CONFIG_ID")
 
     @validator("LOG_LEVEL", pre=True)
     def transform_log_level(cls, log_level):
