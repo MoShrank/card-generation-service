@@ -1,9 +1,24 @@
-from typing import List, Literal, Optional
+from typing import Any, Callable, List, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from models.Note import GPTCard
 from models.PyObjectID import PyObjectID
+
+
+def create_contains_placeholders_validator(
+    *placeholders: str,
+) -> Callable[[Any, Any], Any]:
+    def _validator(cls, v):
+        """
+        Validate that string contains all specified placeholders.
+        """
+        for placeholder in placeholders:
+            if f"{{{placeholder}}}" not in v:
+                raise ValueError(f'String must contain a "{placeholder}" placeholder')
+        return v
+
+    return _validator
 
 
 class Example(BaseModel):
@@ -47,3 +62,11 @@ class CardGenerationConfig(ModelConfig):
     card_prefix: str
     note_prefix: str
     prompt_prefix: str
+
+
+class QuestionAnswerGPTConfig(ModelConfig):
+    system_message: str
+
+    @validator("system_message", allow_reuse=True)
+    def system_message_contains_placeholders(cls, v):
+        return create_contains_placeholders_validator("question")(cls, v)

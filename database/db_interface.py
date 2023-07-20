@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Any, Dict
 
 
 class DBInterface(ABC):
@@ -17,4 +17,8 @@ class DBInterface(ABC):
 
     @abstractmethod
     async def update_one(self, query: Dict, update: Dict) -> Dict:
+        pass
+
+    @abstractmethod
+    async def delete_one(self, query: Dict) -> Any:
         pass

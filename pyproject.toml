@@ -12,7 +12,6 @@ python-dotenv = "^0.19.2"
 slowapi = "^0.1.5"
 motor = "^3.1.2"
 requests = "^2.27.1"
-uvicorn = {extras = ["standard"], version = "^0.17.6"}
 beautifulsoup4 = "^4.11.2"
 readability-lxml = "^0.8.1"
 transformers = "^4.27.4"
@@ -21,6 +20,8 @@ tiktoken = "^0.4.0"
 torch = [{version="^2.0.0", markers = "platform_machine == 'aarch64'"},
 {url="https://mirror.sjtu.edu.cn/pytorch-wheels/cpu-cxx11-abi/torch-2.0.0+cpu.cxx11.abi-cp311-cp311-linux_x86_64.whl", markers = "platform_machine == 'x86_64'"}]
 httpx = "^0.24.1"
+uvicorn = {extras = ["standard"], version = "^0.23.0"}
+lxml = "^4.9.3"
 
 
 [tool.poetry.dev-dependencies]
