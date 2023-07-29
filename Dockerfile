@@ -1,4 +1,4 @@
-FROM python:3.11.0-slim-buster
+FROM python:3.11.4-slim-bookworm
 
 LABEL maintainer="Moritz Eich <hey@moritz.dev>"
 
