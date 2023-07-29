@@ -127,7 +127,7 @@ async def create_post(
     )
 
     vector_store.add_document(
-        info["content"], {"user_id": userID, "source_id": result.inserted_id}
+        info["content"], {"user_id": userID, "source_id": str(result.inserted_id)}
     )
 
     return WebContentCreatedResponse(message="succes", data=webContent)
