@@ -26,6 +26,12 @@ class EnvConfig(BaseSettings):
     def transform_log_level(cls, log_level):
         return log_level.upper()
 
+    def is_dev(self):
+        return self.ENV == "development"
+
+    def is_prod(self):
+        return self.ENV == "production"
+
 
 load_dotenv(find_dotenv())
 env_config = EnvConfig()  # type: ignore

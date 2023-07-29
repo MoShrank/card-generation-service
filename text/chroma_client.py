@@ -4,7 +4,7 @@ import chromadb  # type: ignore
 
 from config import env_config
 
-is_dev = env_config.ENV == "dev"
+is_dev = env_config.is_dev()
 
 if is_dev:
     chroma_client = chromadb.EphemeralClient()

@@ -56,7 +56,7 @@ async def lifespan(
     logger.info("Importing data to ChromaDB...")
     await import_data()
 
-    if env_config.ENV == "production":
+    if env_config.is_prod():
         logger.info("Production environment detected")
 
         logger.info("Loading Card Generation model...")

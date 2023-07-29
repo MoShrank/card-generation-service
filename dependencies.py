@@ -40,9 +40,7 @@ vector_store = VectorStore(text_splitter, chroma_client, 3)
 deck_service = DeckServiceAPI(env_config)
 
 card_source_generator = (
-    CardSourceGenerator()
-    if env_config.ENV == "production"
-    else CardSourceGeneratorMock()
+    CardSourceGenerator() if env_config.is_prod() else CardSourceGeneratorMock()
 )
 
 db_conn = DBConnection(env_config.DATABASE)
