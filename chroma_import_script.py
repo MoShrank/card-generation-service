@@ -1,7 +1,7 @@
-import chromadb  # type: ignore
 import motor.motor_asyncio
 
 from config import env_config
+from text.chroma_client import chroma_client
 from text.TextSplitter import TextSplitter
 from text.VectorStore import VectorStore
 
@@ -18,9 +18,6 @@ async def main():
     web_content = db[collection]
     web_content_entries = await web_content.find({}).to_list(length=1000)
 
-    chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
-    # chroma_client = chromadb.EphemeralClient()
-
     ts = TextSplitter(1000, 70)
     vs = VectorStore(ts, chroma_client)
 
@@ -36,6 +33,8 @@ async def main():
     vs.add_documents(documents, metadata)  # type: ignore
 
     collection = chroma_client.get_collection(name="webContent")
+
+    print(f"Imported {collection.count()} documents!")
 
 
 if __name__ == "__main__":

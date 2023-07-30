@@ -73,18 +73,18 @@ async def lifespan(
             summarizer_model_config, env_config.OPENAI_API_KEY
         )
 
-        logger.info("Loading Question Answer GPT model...")
-        qagpt_model_config = await get_config(env_config.QAGPT_CONFIG_ID)
-        qagpt_model_config = QuestionAnswerGPTConfig(**qagpt_model_config)
-        dependencies.question_answer_gpt = QuestionAnswerGPT(
-            qagpt_model_config, env_config.OPENAI_API_KEY
-        )
-
     else:
         logger.info("Development environment detected")
 
         dependencies.card_generation = CardGenerationMock()
         dependencies.summarizer = SummarizerMock()
+
+    logger.info("Loading Question Answer GPT model...")
+    qagpt_model_config = await get_config(env_config.QAGPT_CONFIG_ID)
+    qagpt_model_config = QuestionAnswerGPTConfig(**qagpt_model_config)
+    dependencies.question_answer_gpt = QuestionAnswerGPT(
+        qagpt_model_config, env_config.OPENAI_API_KEY
+    )
 
     yield
 
