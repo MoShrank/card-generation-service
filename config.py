@@ -1,3 +1,5 @@
+from typing import Literal
+
 from dotenv import find_dotenv, load_dotenv
 from pydantic import BaseSettings, Field, validator
 
@@ -14,7 +16,7 @@ class EnvConfig(BaseSettings):
         "deck-management-service", env="DECK_MANAGEMENT_SERVICE_HOST_NAME"
     )
     DATABASE: str = Field("spacey", env="DATABASE")
-    ENV: str = Field("development", env="ENV")
+    ENV: Literal["development", "production"] = Field("development", env="ENV")
     MODEL_CONFIG_ID: str = Field(None, env="MODEL_CONFIG_ID")
     SUMMARIZER_CONFIG_ID: str = Field(None, env="SUMMARIZER_CONFIG_ID")
     MAX_TEXT_LENGTH: int = Field(1000, env="MAX_TEXT_LENGTH")
