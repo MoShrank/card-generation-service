@@ -16,11 +16,16 @@ poetry install
 All environment variables needed for production can be found inside the [config.py](./config.py) file. For running it locally the following environment variables are needed:
 
 ```
+PORT = 80
 OPENAI_API_KEY=<openai-api-key>
 USER_RATE_LIMIT = <rate-limit-for-openai-api>
 MONGO_DB_CONNECTION = <mongo-db-connection>
 MODEL_CONFIG_ID = <model-config-id>
-ENV = development
+SUMMARIZER_CONFIG_ID=<summarizer-config-id>
+QAGPT_CONFIG_ID=<qagpt-config-id>
+ENV = "development"
+LOG_LEVEL = "info"
+MAX_TEXT_LENGTH=3500
 ```
 For testing purposes the openai api to generate cards is only called when ENV is set to production otherwise it just returns a list of dummy cards. In addition to that, the model_config_id needs to be provided which is used to query a config from the database. The config needs to be inserted manually before starting the service and needs to correspond to the config schema as defined [here](./models/ModelConfig.py).
 
