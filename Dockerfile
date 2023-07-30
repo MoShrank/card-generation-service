@@ -5,6 +5,7 @@ LABEL maintainer="Moritz Eich <hey@moritz.dev>"
 ENV PORT=80
 
 RUN apt-get update; apt-get install curl -y
+RUN apt-get install build-essential -y
 
 RUN mkdir /app
 
