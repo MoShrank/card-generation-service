@@ -22,7 +22,7 @@ torch = [{version="^2.0.0", markers = "platform_machine == 'aarch64'"},
 httpx = "^0.24.1"
 uvicorn = {extras = ["standard"], version = "^0.23.0"}
 lxml = "^4.9.3"
-chromadb-client = "0.4.3.dev0"
+chromadb = "0.4.3"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -33,7 +33,6 @@ mypy = "^0.950"
 types-requests = "^2.27.25"
 pytest = "^7.1.2"
 mongo-types = "^0.15.1"
-chromadb = "0.4.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
