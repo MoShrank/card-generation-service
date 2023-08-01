@@ -1,4 +1,4 @@
-from typing import Mapping, Optional, Union
+from typing import Literal, Mapping, Optional, Union
 from uuid import uuid4
 
 import chromadb  # type: ignore
@@ -10,6 +10,15 @@ from text.TextSplitter import TextSplitterInterface
 COLLECTION_NAME = "webContent"
 
 Metadata = Mapping[str, Union[str, int, float]]
+
+Include = list[
+    Union[
+        Literal["documents"],
+        Literal["embeddings"],
+        Literal["metadatas"],
+        Literal["distances"],
+    ]
+]
 
 
 class VectorStore:
@@ -61,18 +70,22 @@ class VectorStore:
 
         return filter
 
-    def query(self, query: str, filter_values: dict[str, str]) -> list[str]:
+    def query(
+        self,
+        query: str,
+        filter_values: dict[str, str],
+        include: Include = ["documents"],
+    ) -> dict:
         query_filter = self._compose_and_filter(filter_values)
 
         results = self._collection.query(
             query_texts=[query],
             n_results=self._max_query_results,
             where=query_filter,
+            include=include,
         )
 
-        documents = results["documents"][0] if results["documents"] else []
-
-        return documents
+        return results
 
     def _generate_id(self) -> str:
         return str(uuid4())

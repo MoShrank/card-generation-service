@@ -203,3 +203,36 @@ async def get_answer(
             documents=documents,
         ),
     )
+
+
+# route that should serve as a search endpoint for all articles
+@router.get(
+    "/search",
+    response_model=WebContentResponse,
+)
+async def search_posts(
+    userID: str,
+    query: str,
+    web_content_repo: DBInterface = Depends(get_web_content_repo),
+    vector_store: VectorStore = Depends(get_vector_store),
+) -> WebContentResponse:
+    filter = {
+        "user_id": userID,
+    }
+
+    documents = vector_store.query(query, filter)
+
+    if not documents:
+        raise HTTPException(
+            status_code=404,
+            message="Failed to search",
+            error="No documents found",
+        )
+
+    webContentDB = await web_content_repo.query({"_id": {"$in": documents}})
+    webpages = parse_obj_as(List[WebContentData], webContentDB)
+
+    return WebContentResponse(
+        data=webpages,
+        message="Successfully retrieved webpages",
+    )
