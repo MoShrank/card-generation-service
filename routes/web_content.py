@@ -70,8 +70,10 @@ async def create_post(
 ) -> WebContentCreatedResponse:
     url = body.url
 
-    raw_content = get_content(url)
-    if not raw_content:
+    try:
+        raw_content = get_content(url)
+    except Exception as e:
+        logger.error(f"Failed to extract info from webpage. Error: {e}")
         raise HTTPException(
             status_code=500,
             message="Failed to scrape web page",
@@ -95,7 +97,7 @@ async def create_post(
         try:
             summary = summarizer(info["content"], userID)
         except Exception as e:
-            logger.error(e)
+            logger.error(f"Failed to summarise webpage. Error: {e}")
             raise HTTPException(
                 status_code=500,
                 message="Failed to summarise web page",

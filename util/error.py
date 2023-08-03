@@ -8,10 +8,12 @@ def retry_on_exception(exception, max_retries=3, sleep_time=5):
             while retries < max_retries:
                 try:
                     return func(*args, **kwargs)
-                except exception:
+                except exception as e:
                     retries += 1
                     if retries == max_retries:
-                        raise
+                        raise Exception(
+                            f"Failed to execute {func.__name__} after {max_retries} retries."
+                        ) from e
                 time.sleep(sleep_time)
 
         return wrapper
