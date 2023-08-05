@@ -26,7 +26,7 @@ from models.WebContent import (
 from text.extract_info import extract_info
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.Summarizer import SummarizerInterface
-from text.VectorStore import VectorStore
+from text.VectorStore import VectorStoreInterface
 from util.scraper import get_content
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ async def create_post(
     body: WebContentRequest,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
     summarizer: SummarizerInterface = Depends(get_summarizer),
-    vector_store: VectorStore = Depends(get_vector_store),
+    vector_store: VectorStoreInterface = Depends(get_vector_store),
 ) -> WebContentCreatedResponse:
     url = body.url
 
@@ -168,7 +168,7 @@ async def get_answer(
     postID: str,
     question: str,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
-    vector_store: VectorStore = Depends(get_vector_store),
+    vector_store: VectorStoreInterface = Depends(get_vector_store),
     qa_gpt: QuestionAnswerGPTInterface = Depends(get_question_answer_gpt),
 ) -> WebContentQAResponse:
     web_content = await web_content_repo.find_one(
@@ -211,12 +211,13 @@ async def get_answer(
 @router.get(
     "/search",
     response_model=WebContentResponse,
+    response_model_by_alias=False,
 )
 async def search_posts(
     userID: str,
     query: str,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
-    vector_store: VectorStore = Depends(get_vector_store),
+    vector_store: VectorStoreInterface = Depends(get_vector_store),
 ) -> WebContentResponse:
     filter = {
         "user_id": userID,

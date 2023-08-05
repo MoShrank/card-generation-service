@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import Literal, Mapping, Optional, Union
 from uuid import uuid4
 
@@ -20,8 +21,30 @@ Include = list[
     ]
 ]
 
+SearchQueryOperators = Literal["$and", "$or"]
+SearchQuery = dict[SearchQueryOperators, list[dict[str, str]]]
 
-class VectorStore:
+
+class VectorStoreInterface(ABC):
+    @abstractmethod
+    def add_document(self, document: str, metadata: Optional[Metadata] = None):
+        pass
+
+    @abstractmethod
+    def add_documents(self, documents: list[str], metadatas: list[Metadata]):
+        pass
+
+    @abstractmethod
+    def query(
+        self,
+        query: str,
+        filter_values: dict[str, str],
+        include: Include = ["documents"],
+    ) -> dict:
+        pass
+
+
+class VectorStore(VectorStoreInterface):
     def __init__(
         self,
         document_splitter: TextSplitterInterface,
@@ -63,7 +86,7 @@ class VectorStore:
         if len(filter_values) == 1:
             return filter_values
 
-        filter = {"$and": []}
+        filter: SearchQuery = {"$and": []}
 
         for key, value in filter_values.items():
             filter["$and"].append({key: value})

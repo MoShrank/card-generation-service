@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pytest
 from bson import ObjectId
 from fastapi.testclient import TestClient
@@ -5,6 +7,7 @@ from fastapi.testclient import TestClient
 from dependencies import get_web_content_repo
 from main import app
 from models.WebContent import WebContentRequest
+from text.VectorStore import Include, Metadata, VectorStoreInterface
 
 client = TestClient(app)
 
@@ -65,6 +68,48 @@ app.dependency_overrides[get_web_content_repo] = get_web_content_repo_mock
 
 def test_get_posts(test_user_id, test_web_content_request):
     response = client.get(f"/post?userID={test_user_id}")
+
+    data = response.json()["data"]
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Successfully retrieved webpages"
+    assert len(data) == 1
+    assert data[0]["url"] == test_web_content_request.url
+    assert "id" in data[0]
+    assert isinstance(data[0]["id"], str)
+
+
+class VectorStoreMock(VectorStoreInterface):
+    def __init__(self):
+        self.documents = []
+        self.metadatas = []
+
+    def add_document(self, document: str, metadata: Optional[Metadata] = None):
+        self.documents.append(document)
+        self.metadatas.append(metadata)
+
+    def add_documents(self, documents: list[str], metadatas: list[Metadata]):
+        self.documents.extend(documents)
+        self.metadatas.extend(metadatas)
+
+    def query(
+        self,
+        query: str,
+        filter_values: dict[str, str],
+        include: Include = ["documents"],
+    ) -> dict:
+        return {
+            "documents": self.documents,
+            "metadatas": self.metadatas,
+        }
+
+
+def get_vector_store_mock():
+    return VectorStoreMock()
+
+
+def test_search_web_articles(test_user_id, test_web_content_request):
+    response = client.get(f"post/search?userID={test_user_id}&query=example")
 
     data = response.json()["data"]
 
