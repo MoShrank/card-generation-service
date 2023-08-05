@@ -1,19 +1,17 @@
 import requests
-from typing import Optional
 
-MAX_RETRIES = 3
+from util.error import retry_on_exception
 
 
-def get_content(url: str) -> Optional[str]:
+@retry_on_exception(exception=Exception)
+def get_content(url: str) -> str:
     content = None
 
-    for i in range(MAX_RETRIES):
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                content = response.text
-                break
-        except Exception as e:
-            print(f"Could not fetch page. Error: {e}")
+    response = requests.get(url)
+
+    if response.ok:
+        content = response.text
+    else:
+        raise Exception(f"Failed to get content from {url}. Response: {response}")
 
     return content

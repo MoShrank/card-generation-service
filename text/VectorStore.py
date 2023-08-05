@@ -1,4 +1,5 @@
-from typing import Mapping, Optional, Union
+from abc import ABC, abstractmethod
+from typing import Literal, Mapping, Optional, Union
 from uuid import uuid4
 
 import chromadb  # type: ignore
@@ -11,8 +12,39 @@ COLLECTION_NAME = "webContent"
 
 Metadata = Mapping[str, Union[str, int, float]]
 
+Include = list[
+    Union[
+        Literal["documents"],
+        Literal["embeddings"],
+        Literal["metadatas"],
+        Literal["distances"],
+    ]
+]
 
-class VectorStore:
+SearchQueryOperators = Literal["$and", "$or"]
+SearchQuery = dict[SearchQueryOperators, list[dict[str, str]]]
+
+
+class VectorStoreInterface(ABC):
+    @abstractmethod
+    def add_document(self, document: str, metadata: Optional[Metadata] = None):
+        pass
+
+    @abstractmethod
+    def add_documents(self, documents: list[str], metadatas: list[Metadata]):
+        pass
+
+    @abstractmethod
+    def query(
+        self,
+        query: str,
+        filter_values: dict[str, str],
+        include: Include = ["documents"],
+    ) -> dict:
+        pass
+
+
+class VectorStore(VectorStoreInterface):
     def __init__(
         self,
         document_splitter: TextSplitterInterface,
@@ -54,25 +86,29 @@ class VectorStore:
         if len(filter_values) == 1:
             return filter_values
 
-        filter = {"$and": []}
+        filter: SearchQuery = {"$and": []}
 
         for key, value in filter_values.items():
             filter["$and"].append({key: value})
 
         return filter
 
-    def query(self, query: str, filter_values: dict[str, str]) -> list[str]:
+    def query(
+        self,
+        query: str,
+        filter_values: dict[str, str],
+        include: Include = ["documents"],
+    ) -> dict:
         query_filter = self._compose_and_filter(filter_values)
 
         results = self._collection.query(
             query_texts=[query],
             n_results=self._max_query_results,
             where=query_filter,
+            include=include,
         )
 
-        documents = results["documents"][0] if results["documents"] else []
-
-        return documents
+        return results
 
     def _generate_id(self) -> str:
         return str(uuid4())

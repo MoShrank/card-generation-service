@@ -26,7 +26,7 @@ from models.WebContent import (
 from text.extract_info import extract_info
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.Summarizer import SummarizerInterface
-from text.VectorStore import VectorStore
+from text.VectorStore import VectorStoreInterface
 from util.scraper import get_content
 
 logger = logging.getLogger(__name__)
@@ -66,12 +66,14 @@ async def create_post(
     body: WebContentRequest,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
     summarizer: SummarizerInterface = Depends(get_summarizer),
-    vector_store: VectorStore = Depends(get_vector_store),
+    vector_store: VectorStoreInterface = Depends(get_vector_store),
 ) -> WebContentCreatedResponse:
     url = body.url
 
-    raw_content = get_content(url)
-    if not raw_content:
+    try:
+        raw_content = get_content(url)
+    except Exception as e:
+        logger.error(f"Failed to extract info from webpage. Error: {e}")
         raise HTTPException(
             status_code=500,
             message="Failed to scrape web page",
@@ -95,7 +97,7 @@ async def create_post(
         try:
             summary = summarizer(info["content"], userID)
         except Exception as e:
-            logger.error(e)
+            logger.error(f"Failed to summarise webpage. Error: {e}")
             raise HTTPException(
                 status_code=500,
                 message="Failed to summarise web page",
@@ -166,7 +168,7 @@ async def get_answer(
     postID: str,
     question: str,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
-    vector_store: VectorStore = Depends(get_vector_store),
+    vector_store: VectorStoreInterface = Depends(get_vector_store),
     qa_gpt: QuestionAnswerGPTInterface = Depends(get_question_answer_gpt),
 ) -> WebContentQAResponse:
     web_content = await web_content_repo.find_one(
@@ -202,4 +204,38 @@ async def get_answer(
             answer=answer,
             documents=documents,
         ),
+    )
+
+
+# route that should serve as a search endpoint for all articles
+@router.get(
+    "/search",
+    response_model=WebContentResponse,
+    response_model_by_alias=False,
+)
+async def search_posts(
+    userID: str,
+    query: str,
+    web_content_repo: DBInterface = Depends(get_web_content_repo),
+    vector_store: VectorStoreInterface = Depends(get_vector_store),
+) -> WebContentResponse:
+    filter = {
+        "user_id": userID,
+    }
+
+    documents = vector_store.query(query, filter)
+
+    if not documents:
+        raise HTTPException(
+            status_code=404,
+            message="Failed to search",
+            error="No documents found",
+        )
+
+    webContentDB = await web_content_repo.query({"_id": {"$in": documents}})
+    webpages = parse_obj_as(List[WebContentData], webContentDB)
+
+    return WebContentResponse(
+        data=webpages,
+        message="Successfully retrieved webpages",
     )

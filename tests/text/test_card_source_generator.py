@@ -6,7 +6,11 @@ os.environ["MODEL_PATH"] = "../distilbert-base-cased-distilled-squad"
 
 
 def test_find_sentence_indices():
-    source_generator = CardSourceGenerator()
+    try:
+        source_generator = CardSourceGenerator()
+    except OSError:
+        print("Unable to load model. Please ensure the model is downloaded.")
+        return
 
     test_cases = [
         {
