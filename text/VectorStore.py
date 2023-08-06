@@ -24,6 +24,8 @@ Include = list[
 SearchQueryOperators = Literal["$and", "$or"]
 SearchQuery = dict[SearchQueryOperators, list[dict[str, str]]]
 
+# TODO: cutoff for number of results + relevance score -> only return results above a certain distance
+
 
 class VectorStoreInterface(ABC):
     @abstractmethod

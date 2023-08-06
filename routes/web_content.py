@@ -187,7 +187,7 @@ async def get_answer(
         "source_id": postID,
     }
 
-    documents = vector_store.query(web_content["content"], filter)
+    documents = vector_store.query(web_content["content"], filter)["documents"][0]
 
     if not documents:
         raise HTTPException(
@@ -223,17 +223,22 @@ async def search_posts(
         "user_id": userID,
     }
 
-    documents = vector_store.query(query, filter)
+    metadatas = vector_store.query(query, filter, include=["metadatas"])["metadatas"][0]
 
-    if not documents:
+    if not metadatas:
         raise HTTPException(
             status_code=404,
             message="Failed to search",
             error="No documents found",
         )
 
-    webContentDB = await web_content_repo.query({"_id": {"$in": documents}})
-    webpages = parse_obj_as(List[WebContentData], webContentDB)
+    ids = [PyObjectID(doc["source_id"]) for doc in metadatas]
+
+    if len(ids) == 0:
+        webpages = []
+    else:
+        webContentDB = await web_content_repo.query({"_id": {"$in": ids}})
+        webpages = parse_obj_as(List[WebContentData], webContentDB)
 
     return WebContentResponse(
         data=webpages,
