@@ -2,6 +2,11 @@ import requests
 
 from util.error import retry_on_exception
 
+headers = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+}
+
 
 @retry_on_exception(exception=Exception)
 def get_content(url: str) -> str:
