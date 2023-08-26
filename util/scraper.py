@@ -12,7 +12,7 @@ headers = {
 def get_content(url: str) -> str:
     content = None
 
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
 
     if response.ok:
         content = response.text
