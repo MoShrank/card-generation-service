@@ -11,6 +11,7 @@ from external.DeckServiceAPI import DeckServiceAPI
 from models.ModelConfig import (
     CardGenerationConfig,
     QuestionAnswerGPTConfig,
+    SingleFlashcardGeneratorConfig,
     SummarizerConfig,
 )
 from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
@@ -29,7 +30,7 @@ WEBCONTENT_COLLECTION = "webContent"
 model_config: Optional[CardGenerationConfig] = None
 card_generation: Optional[CardGenerationInterface] = None
 
-single_flashcard_model_config: Optional[CardGenerationConfig] = None
+single_flashcard_model_config: Optional[SingleFlashcardGeneratorConfig] = None
 single_flashcard_generation: Optional[GPTInterface] = None
 
 summarizer_model_config: Optional[SummarizerConfig] = None

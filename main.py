@@ -13,6 +13,7 @@ from models.HttpModels import HTTPException
 from models.ModelConfig import (
     CardGenerationConfig,
     QuestionAnswerGPTConfig,
+    SingleFlashcardGeneratorConfig,
     SummarizerConfig,
 )
 from models.PyObjectID import PyObjectID
@@ -66,7 +67,7 @@ async def setup_prod_env():
     single_flashcard_model_config = await get_config(
         env_config.SINGLE_FLASHCARD_GENERATOR_CONFIG_ID
     )
-    single_flashcard_model_config = CardGenerationConfig(
+    single_flashcard_model_config = SingleFlashcardGeneratorConfig(
         **single_flashcard_model_config
     )
     dependencies.single_flashcard_generation = SingleFlashcardGenerator(
