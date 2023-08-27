@@ -224,7 +224,6 @@ async def generate_card(
     note_repo: DBInterface = Depends(get_note_repo),
     generate_card: GPTInterface = Depends(get_single_card_generation),
 ):
-    print("generate_card")
     openai_user_id = await get_or_create_openai_user(user_repo, userID)
 
     text = body.text

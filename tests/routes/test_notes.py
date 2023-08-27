@@ -273,8 +273,6 @@ def test_generate_card():
         "source_end_index": 4,
     }
 
-    print("hello")
     response = client.post(f"/notes/{str(OBJECT_ID)}/card?userID=1", json=data)
-    print("response", response.json())
     assert response.status_code == expected_status_code
     assert response.json()["data"] == expected_data
