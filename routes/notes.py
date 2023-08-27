@@ -11,24 +11,34 @@ from dependencies import (
     get_card_source_generator,
     get_deck_service,
     get_note_repo,
+    get_single_card_generation,
     get_user_repo,
 )
 from external.CardGeneration import CardGenerationInterface
 from external.DeckServiceAPI import DeckServiceAPIInterface
-from models.HttpModels import HTTPException
+from models.HttpModels import EmptyResponse, HTTPException
 from models.Note import (
     AddedCardsResponse,
+    AddedCardsResponseData,
     Card,
+    CardResponse,
+    CardResponseData,
     CardsResponse,
+    CardsResponseData,
+    GenerateCardRequest,
     GenerateCardsRequest,
+    GPTCard,
     Note,
     NotesResponse,
+    NotesResponseData,
     UpdateCardsRequest,
     UpdatedCardsResponse,
+    UpdatedCardsResponseData,
 )
 from models.PyObjectID import PyObjectID
 from models.User import User
 from text.CardSourceGenerator import CardSourceGenerator
+from text.GPTInterface import GPTInterface
 from util.limitier import limiter
 
 logger = logging.getLogger("logger")
@@ -53,6 +63,22 @@ def map_notes_to_deck(notes: List[Dict]) -> Dict[str, Dict]:
     return notes_by_deck_id
 
 
+async def get_or_create_openai_user(user_repo: DBInterface, userID: str) -> str:
+    existing_open_ai_user: Dict = await user_repo.find_one({"user_id": userID})
+
+    if not existing_open_ai_user:
+        new_open_ai_user = User(user_id=userID, total_no_generated=1)
+        result = await user_repo.insert_one(new_open_ai_user.dict(by_alias=True))
+        open_ai_user_id = str(result.inserted_id)
+    else:
+        await user_repo.update_one(
+            {"_id": existing_open_ai_user["_id"]}, {"$inc": {"total_no_generated": 1}}
+        )
+        open_ai_user_id = str(existing_open_ai_user["_id"])
+
+    return open_ai_user_id
+
+
 @router.post("", response_model=CardsResponse)
 @limiter.limit(f"{USER_RATE_LIMIT}/minute")
 async def generate_cards(
@@ -65,17 +91,7 @@ async def generate_cards(
     generate_cards: CardGenerationInterface = Depends(get_card_generation),
     card_source_generator: CardSourceGenerator = Depends(get_card_source_generator),
 ):
-    existing_open_ai_user: Dict = await user_repo.find_one({"user_id": userID})
-
-    if not existing_open_ai_user:
-        new_open_ai_user = User(user_id=userID, total_no_generated=1)
-        result = await user_repo.insert_one(new_open_ai_user.dict(by_alias=True))
-        open_ai_user_id = str(result.inserted_id)
-    else:
-        await user_repo.update_one(
-            {"_id": existing_open_ai_user["_id"]}, {"$inc": {"total_no_generated": 1}}
-        )
-        open_ai_user_id = str(existing_open_ai_user["_id"])
+    open_ai_user_id = await get_or_create_openai_user(user_repo, userID)
 
     text = body.text
 
@@ -102,7 +118,7 @@ async def generate_cards(
         text=text,
         cards_added=False,
         cards=cards_with_source,
-        card_edited_at=None,
+        cards_edited_at=None,
         cards_edited=False,
         created_at=now,
     ).dict(by_alias=True)
@@ -112,7 +128,9 @@ async def generate_cards(
 
     note["id"] = note_id
 
-    return CardsResponse(message="success", data={**note})
+    data = CardsResponseData(**note)
+
+    return CardsResponse(message="success", data=data)
 
 
 @router.post(
@@ -156,7 +174,9 @@ async def add_cards(
         {"$set": {"cards_added": True}},
     )
 
-    return AddedCardsResponse(message="success", data={"cards": cards})
+    data = AddedCardsResponseData(cards=cards)
+
+    return AddedCardsResponse(message="success", data=data)
 
 
 @router.put("/{id}", response_model=UpdatedCardsResponse)
@@ -174,9 +194,9 @@ async def update_cards(
         {"$set": {"cards": new_cards, "card_edited_at": now, "cards_edited": True}},
     )
 
-    return UpdatedCardsResponse(
-        message="Successfully updated cards", data={"cards": new_cards}
-    )
+    data = UpdatedCardsResponseData(cards=new_cards)
+
+    return UpdatedCardsResponse(message="Successfully updated cards", data=data)
 
 
 @router.get("", response_model=NotesResponse)
@@ -188,4 +208,47 @@ async def get_note(
 
     notes_by_deck = map_notes_to_deck(notes)
 
-    return NotesResponse(message="success", data=notes_by_deck)
+    data = {key: NotesResponseData(**value) for key, value in notes_by_deck.items()}
+
+    return NotesResponse(message="success", data=data)
+
+
+@router.post("/{id}/card", response_model=CardResponse)
+@limiter.limit(f"{USER_RATE_LIMIT}/minute")
+async def generate_card(
+    id: str,
+    request: Request,
+    body: GenerateCardRequest,
+    userID: str,
+    user_repo: DBInterface = Depends(get_user_repo),
+    note_repo: DBInterface = Depends(get_note_repo),
+    generate_card: GPTInterface = Depends(get_single_card_generation),
+):
+    print("generate_card")
+    openai_user_id = await get_or_create_openai_user(user_repo, userID)
+
+    text = body.text
+
+    generated_card: GPTCard = generate_card(
+        text,
+        openai_user_id,
+    )
+
+    now = datetime.now().isoformat()
+
+    card = Card(
+        **generated_card.dict(),
+        source_start_index=body.source_start_index,
+        source_end_index=body.source_end_index,
+    )
+
+    await note_repo.update_one(
+        {"_id": PyObjectID(id), "user_id": userID},
+        {
+            "$set": {"cards_edited_at": now, "cards_edited": True},
+            "$push": {"cards": {"$each": [card.dict(by_alias=True)], "$position": 0}},
+        },
+    )
+
+    data = CardResponseData(id=id, text=text, card=card)
+    return CardResponse(message="success", data=data)

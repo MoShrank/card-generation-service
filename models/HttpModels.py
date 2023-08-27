@@ -1,12 +1,14 @@
-from abc import ABC
-from typing import Any
+from typing import Generic, TypeVar
 
+from bson import ObjectId
 from pydantic import BaseModel
 
+DataT = TypeVar("DataT")
 
-class BaseResponse(BaseModel, ABC):
+
+class BaseResponse(BaseModel, Generic[DataT]):
     message: str
-    data: Any
+    data: DataT
 
 
 class EmptyResponse(BaseModel):

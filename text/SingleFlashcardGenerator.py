@@ -16,6 +16,9 @@ class SingleFlashcardGeneratorMock(GPTInterface):
             answer="Washington D.C.",
         )
 
+    def _generate_messages(self) -> Messages:
+        return []
+
 
 class SingleFlashcardGenerator(GPTInterface):
     _model_config: SingleFlashcardGeneratorConfig

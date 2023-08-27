@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from typing import List
 
 from fastapi import APIRouter, Depends
 from pydantic import parse_obj_as
@@ -17,11 +16,11 @@ from models.PyObjectID import PyObjectID
 from models.WebContent import (
     WebContent,
     WebContentCreatedResponse,
-    WebContentData,
     WebContentQA,
     WebContentQAResponse,
     WebContentRequest,
     WebContentResponse,
+    WebContentResponseData,
 )
 from text.extract_info import extract_info
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
@@ -40,15 +39,16 @@ router = APIRouter(
 
 @router.get(
     "",
-    response_model_by_alias=False,
     response_model=WebContentResponse,
+    response_model_by_alias=False,
 )
 async def get_posts(
     userID: str,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
 ) -> WebContentResponse:
     webContentDB = await web_content_repo.query({"user_id": userID})
-    webpages = parse_obj_as(List[WebContentData], webContentDB)
+
+    webpages = parse_obj_as(list[WebContentResponseData], webContentDB)
 
     return WebContentResponse(
         data=webpages,
@@ -120,7 +120,7 @@ async def create_post(
 
     result = await web_content_repo.insert_one(web_content.dict(by_alias=True))
 
-    webContent = WebContentData(
+    webContent = WebContentResponseData(
         _id=result.inserted_id,
         url=web_content.url,
         summary=web_content.summary,
@@ -225,22 +225,16 @@ async def search_posts(
 
     metadatas = vector_store.query(query, filter, include=["metadatas"])["metadatas"][0]
 
-    if not metadatas:
-        raise HTTPException(
-            status_code=404,
-            message="Failed to search",
-            error="No documents found",
+    articles = []
+
+    if metadatas and len(metadatas) > 0:
+        ids = [PyObjectID(doc["source_id"]) for doc in metadatas]
+        webContentDB = await web_content_repo.query(
+            {"_id": {"$in": ids}, "user_id": userID}
         )
-
-    ids = [PyObjectID(doc["source_id"]) for doc in metadatas]
-
-    if len(ids) == 0:
-        webpages = []
-    else:
-        webContentDB = await web_content_repo.query({"_id": {"$in": ids}})
-        webpages = parse_obj_as(List[WebContentData], webContentDB)
+        articles = parse_obj_as(list[WebContentResponseData], webContentDB)
 
     return WebContentResponse(
-        data=webpages,
+        data=articles,
         message="Successfully retrieved webpages",
     )

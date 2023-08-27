@@ -33,21 +33,23 @@ class Note(MongoModel):
 
 
 # HTTP Handler models
-class NoteResponse(BaseResponse):
-    class Data(BaseModel):
-        id: str
-        cards: List[Card]
-
-    data: Data
 
 
-class NotesResponse(BaseResponse):
-    class Data(BaseModel):
-        id: str
-        text: str
-        cards: List[Card]
+class NoteResponseData(BaseModel):
+    id: str
+    cards: List[Card]
 
-    data: Dict[str, Data]
+
+NoteResponse = BaseResponse[NoteResponseData]
+
+
+class NotesResponseData(BaseModel):
+    id: str
+    text: str
+    cards: List[Card]
+
+
+NotesResponse = BaseResponse[Dict[str, NotesResponseData]]
 
 
 class GenerateCardsRequest(BaseModel):
@@ -55,20 +57,34 @@ class GenerateCardsRequest(BaseModel):
     deck_id: str
 
 
-class CardsResponse(BaseResponse):
-    class Data(BaseModel):
-        id: str
-        text: str
-        cards: List[Card]
-
-    data: Data
+class GenerateCardRequest(GenerateCardsRequest):
+    source_start_index: int
+    source_end_index: int
 
 
-class UpdatedCardsResponse(BaseResponse):
-    class Data(BaseModel):
-        cards: List[Card]
+class CardsResponseData(BaseModel):
+    id: str
+    text: str
+    cards: List[Card]
 
-    data: Data
+
+CardsResponse = BaseResponse[CardsResponseData]
+
+
+class CardResponseData(BaseModel):
+    id: str
+    text: str
+    card: Card
+
+
+CardResponse = BaseResponse[CardResponseData]
+
+
+class UpdatedCardsResponseData(BaseModel):
+    cards: List[Card]
+
+
+UpdatedCardsResponse = BaseResponse[UpdatedCardsResponseData]
 
 
 class UpdateCardsRequest(BaseModel):
@@ -82,8 +98,8 @@ class DeckServiceCard(BaseModel):
     deck_id: str = Field(default=(...), alias="deckID")
 
 
-class AddedCardsResponse(BaseResponse):
-    class Data(BaseModel):
-        cards: List[DeckServiceCard]
+class AddedCardsResponseData(BaseModel):
+    cards: List[DeckServiceCard]
 
-    data: Data
+
+AddedCardsResponse = BaseResponse[AddedCardsResponseData]

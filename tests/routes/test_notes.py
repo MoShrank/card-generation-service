@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import List
 
 from bson.objectid import ObjectId
@@ -9,11 +9,13 @@ from dependencies import (
     get_card_source_generator,
     get_deck_service,
     get_note_repo,
+    get_single_card_generation,
     get_user_repo,
 )
 from external.CardGeneration import CardGenerationMock
 from main import app
 from models.Note import Card, DeckServiceCard
+from text.SingleFlashcardGenerator import SingleFlashcardGeneratorMock
 from util.AttrDict import AttrDict
 
 client = TestClient(app)
@@ -240,5 +242,39 @@ def test_add_cards():
 
     response = client.post(f"/notes/{OBJECT_ID}/cards?userID=1&deck_id=1")
 
+    assert response.status_code == expected_status_code
+    assert response.json()["data"] == expected_data
+
+
+def get_single_card_generation_mock():
+    return SingleFlashcardGeneratorMock()
+
+
+app.dependency_overrides[get_single_card_generation] = get_single_card_generation_mock
+
+
+def test_generate_card():
+    expected_status_code = 200
+    expected_data = {
+        "id": str(OBJECT_ID),
+        "text": "text",
+        "card": {
+            "question": "What is the capital of the United States?",
+            "answer": "Washington D.C.",
+            "source_start_index": 0,
+            "source_end_index": 4,
+        },
+    }
+
+    data = {
+        "text": "text",
+        "deck_id": "1",
+        "source_start_index": 0,
+        "source_end_index": 4,
+    }
+
+    print("hello")
+    response = client.post(f"/notes/{str(OBJECT_ID)}/card?userID=1", json=data)
+    print("response", response.json())
     assert response.status_code == expected_status_code
     assert response.json()["data"] == expected_data

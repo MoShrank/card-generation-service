@@ -8,7 +8,7 @@ class DBInterface(ABC):
         pass
 
     @abstractmethod
-    async def query(self, query: Dict) -> Dict:
+    async def query(self, query: Dict) -> list[Dict]:
         pass
 
     @abstractmethod

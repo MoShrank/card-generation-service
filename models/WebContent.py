@@ -25,7 +25,7 @@ class WebContent(BaseModel):
     deleted_at: Optional[datetime]
 
 
-class WebContentData(BaseModel):
+class WebContentResponseData(BaseModel):
     id: PyObjectID = Field(alias="_id")
     name: str
     url: str
@@ -40,11 +40,12 @@ class WebContentData(BaseModel):
 
 
 class WebContentResponse(BaseResponse):
-    data: list[WebContentData]
+    data: list[WebContentResponseData]
 
 
-class WebContentCreatedResponse(BaseResponse):
-    data: WebContentData
+# WebContentResponse = BaseResponse[list[WebContentResponseData]]
+
+WebContentCreatedResponse = BaseResponse[WebContentResponseData]
 
 
 class WebContentRequest(BaseModel):
