@@ -56,6 +56,10 @@ class SummarizerConfig(ModelConfig):
     user_message_prefix: str
 
 
+class SingleFlashcardGeneratorConfig(ModelConfig):
+    system_message: str
+
+
 class CardGenerationConfig(ModelConfig):
     type: str
     examples: List[Example]

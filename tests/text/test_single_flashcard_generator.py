@@ -1,0 +1,21 @@
+from unittest.mock import Mock, patch
+
+from models.ModelConfig import SingleFlashcardGeneratorConfig
+from text.SingleFlashcardGenerator import SingleFlashcardGenerator
+
+
+def test_single_flashcard_generator():
+    openai_api_key = "YOUR_OPENAI_API_KEY"
+    mock_config = Mock()
+    mock_config.system_message = "Your system message here"
+    generator = SingleFlashcardGenerator(openai_api_key, mock_config)
+
+    # Mock the _get_completion method
+    with patch.object(
+        SingleFlashcardGenerator,
+        "_get_completion",
+        return_value="Q: What is Python?\nA: A programming language.",
+    ):
+        result = generator("Tell me about Python.", "user123")
+        assert result.question == "What is Python?"
+        assert result.answer == "A programming language."

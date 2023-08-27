@@ -11,6 +11,7 @@ from external.gpt import (
     get_no_tokens,
 )
 from models.ModelConfig import Message, Messages, SummarizerConfig
+from text.GPTInterface import GPTInterface
 from util.error import retry_on_exception
 
 
@@ -25,7 +26,7 @@ class SummarizerMock(SummarizerInterface):
         return "Mock Summary"
 
 
-class Summarizer(SummarizerInterface):
+class Summarizer(SummarizerInterface, GPTInterface):
     _model_config: SummarizerConfig
 
     def __init__(self, config: SummarizerConfig, openai_api_key: str) -> None:
@@ -41,7 +42,9 @@ class Summarizer(SummarizerInterface):
         summaries = []
 
         for chunk in chunks:
-            chunk_summary = self._get_completion(chunk, user_id)
+            messages = self._generate_messages(chunk)
+
+            chunk_summary = self._get_completion(messages, user_id)
             summaries.append(chunk_summary)
 
         summary = self._postprocess(summaries)
@@ -85,16 +88,6 @@ class Summarizer(SummarizerInterface):
         messages = [system_message, user_message]
 
         return messages
-
-    @retry_on_exception(Exception, max_retries=3, sleep_time=5)
-    def _get_completion(self, text: str, user_id: str) -> str:
-        messages = self._generate_messages(text)
-
-        completion = get_chatgpt_completion(
-            self._model_config.parameters, messages, user_id
-        )
-
-        return completion
 
     def _chunk_text(self, text: str, target_size: int) -> List[str]:
         """

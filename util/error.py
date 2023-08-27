@@ -1,9 +1,12 @@
 import time
+from typing import Any, Callable, Type
 
 
-def retry_on_exception(exception, max_retries=3, sleep_time=5):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
+def retry_on_exception(
+    exception: Type[Exception], max_retries: int = 3, sleep_time: int = 5
+) -> Callable:
+    def decorator(func: Callable):
+        def wrapper(*args, **kwargs) -> Any:
             retries = 0
             while retries < max_retries:
                 try:
