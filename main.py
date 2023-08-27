@@ -120,7 +120,7 @@ app.include_router(web_content_router)
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request, exception: HTTPException):
+async def http_exception_handler(exception: HTTPException):
     return JSONResponse(
         status_code=exception.status_code,
         content={
