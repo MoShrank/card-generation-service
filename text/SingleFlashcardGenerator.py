@@ -24,7 +24,9 @@ class SingleFlashcardGenerator(GPTInterface):
     _model_config: SingleFlashcardGeneratorConfig
 
     def __init__(
-        self, openai_api_key: str, model_config: SingleFlashcardGeneratorConfig
+        self,
+        model_config: SingleFlashcardGeneratorConfig,
+        openai_api_key: str,
     ) -> None:
         openai.api_key = openai_api_key
         self._model_config = model_config
