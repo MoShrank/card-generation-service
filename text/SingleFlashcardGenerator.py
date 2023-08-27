@@ -9,6 +9,14 @@ from models.ModelConfig import (
 from text.GPTInterface import GPTInterface
 
 
+class SingleFlashcardGeneratorMock(GPTInterface):
+    def __call__(self, text: str, user_id: str) -> GPTCard:
+        return GPTCard(
+            question="What is the capital of the United States?",
+            answer="Washington D.C.",
+        )
+
+
 class SingleFlashcardGenerator(GPTInterface):
     _model_config: SingleFlashcardGeneratorConfig
 

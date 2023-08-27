@@ -1,6 +1,5 @@
 from unittest.mock import Mock, patch
 
-from models.ModelConfig import SingleFlashcardGeneratorConfig
 from text.SingleFlashcardGenerator import SingleFlashcardGenerator
 
 

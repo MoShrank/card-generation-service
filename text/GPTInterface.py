@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from external.gpt import get_chatgpt_completion
 from models.ModelConfig import Messages, ModelConfig
@@ -7,6 +8,10 @@ from util.error import retry_on_exception
 
 class GPTInterface(ABC):
     _model_config: ModelConfig
+
+    @abstractmethod
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        pass
 
     @abstractmethod
     def _generate_messages(self, *args, **kwargs) -> Messages:

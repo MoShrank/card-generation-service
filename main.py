@@ -20,6 +20,10 @@ from routes.notes import router as notes_router
 from routes.web_content import router as web_content_router
 from text.chroma_client import import_data, wait_for_chroma_connection
 from text.QuestionAnswerGPT import QuestionAnswerGPT
+from text.SingleFlashcardGenerator import (
+    SingleFlashcardGenerator,
+    SingleFlashcardGeneratorMock,
+)
 from text.Summarizer import Summarizer, SummarizerMock
 from util.limitier import limiter
 
@@ -41,6 +45,45 @@ async def get_config(id: str):
     return config
 
 
+async def setup_prod_env():
+    logger.info("Production environment detected")
+
+    logger.info("Loading Card Generation model...")
+    model_config = await get_config(env_config.MODEL_CONFIG_ID)
+    model_config = CardGenerationConfig(**model_config)
+    dependencies.card_generation = CardGeneration(
+        model_config, env_config.OPENAI_API_KEY
+    )
+
+    logger.info("Loading Summarizer model...")
+    summarizer_model_config = await get_config(env_config.SUMMARIZER_CONFIG_ID)
+    summarizer_model_config = SummarizerConfig(**summarizer_model_config)
+    dependencies.summarizer = Summarizer(
+        summarizer_model_config, env_config.OPENAI_API_KEY
+    )
+
+    logger.info("Loading Single Flashcard Generator Model")
+    single_flashcard_model_config = await get_config(
+        env_config.SINGLE_FLASHCARD_GENERATOR_CONFIG_ID
+    )
+    single_flashcard_model_config = CardGenerationConfig(
+        **single_flashcard_model_config
+    )
+    dependencies.single_flashcard_generation = SingleFlashcardGenerator(
+        single_flashcard_model_config, env_config.OPENAI_API_KEY
+    )
+
+
+async def setup_dev_env():
+    logger.info("Development environment detected")
+    dependencies.card_generation = CardGenerationMock()
+    dependencies.summarizer = SummarizerMock()
+    dependencies.single_flashcard_generation = SingleFlashcardGeneratorMock()
+
+
+env_setups = {"production": setup_prod_env, "development": setup_dev_env}
+
+
 @asynccontextmanager
 async def lifespan(
     app: FastAPI,
@@ -56,28 +99,7 @@ async def lifespan(
     logger.info("Importing data to ChromaDB...")
     await import_data()
 
-    if env_config.is_prod():
-        logger.info("Production environment detected")
-
-        logger.info("Loading Card Generation model...")
-        model_config = await get_config(env_config.MODEL_CONFIG_ID)
-        model_config = CardGenerationConfig(**model_config)
-        dependencies.card_generation = CardGeneration(
-            model_config, env_config.OPENAI_API_KEY
-        )
-
-        logger.info("Loading Summarizer model...")
-        summarizer_model_config = await get_config(env_config.SUMMARIZER_CONFIG_ID)
-        summarizer_model_config = SummarizerConfig(**summarizer_model_config)
-        dependencies.summarizer = Summarizer(
-            summarizer_model_config, env_config.OPENAI_API_KEY
-        )
-
-    else:
-        logger.info("Development environment detected")
-
-        dependencies.card_generation = CardGenerationMock()
-        dependencies.summarizer = SummarizerMock()
+    await env_setups[env_config.ENV]()
 
     logger.info("Loading Question Answer GPT model...")
     qagpt_model_config = await get_config(env_config.QAGPT_CONFIG_ID)

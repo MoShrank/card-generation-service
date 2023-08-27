@@ -17,16 +17,28 @@ class EnvConfig(BaseSettings):
     )
     DATABASE: str = Field("spacey", env="DATABASE")
     ENV: Literal["development", "production"] = Field("development", env="ENV")
-    MODEL_CONFIG_ID: str = Field(None, env="MODEL_CONFIG_ID")
-    SUMMARIZER_CONFIG_ID: str = Field(None, env="SUMMARIZER_CONFIG_ID")
     MAX_TEXT_LENGTH: int = Field(1000, env="MAX_TEXT_LENGTH")
     CHROMA_HOST: str = Field("localhost", env="CHROMA_HOST")
     CHROMA_PORT: str = Field("8000", env="CHROMA_PORT")
+
     QAGPT_CONFIG_ID: str = Field(None, env="QAGPT_CONFIG_ID")
+    MODEL_CONFIG_ID: str = Field(None, env="MODEL_CONFIG_ID")
+    SUMMARIZER_CONFIG_ID: str = Field(None, env="SUMMARIZER_CONFIG_ID")
+    SINGLE_FLASHCARD_GENERATOR_CONFIG_ID: str = Field(
+        None, env="SINGLE_FLASHCARD_GENERATOR_CONFIG_ID"
+    )
 
     @validator("LOG_LEVEL", pre=True)
     def transform_log_level(cls, log_level):
         return log_level.upper()
+
+    @property
+    def GPT_CONFIGS(self) -> list[str]:
+        return [
+            getattr(self, field_name)
+            for field_name in self.__fields__
+            if field_name.endswith("_CONFIG_ID")
+        ]
 
     def is_dev(self):
         return self.ENV == "development"

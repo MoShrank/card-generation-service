@@ -15,6 +15,7 @@ from models.ModelConfig import (
 )
 from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
 from text.chroma_client import chroma_client
+from text.GPTInterface import GPTInterface
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.Summarizer import SummarizerInterface
 from text.TextSplitter import TextSplitter
@@ -27,6 +28,9 @@ WEBCONTENT_COLLECTION = "webContent"
 
 model_config: Optional[CardGenerationConfig] = None
 card_generation: Optional[CardGenerationInterface] = None
+
+single_flashcard_model_config: Optional[CardGenerationConfig] = None
+single_flashcard_generation: Optional[GPTInterface] = None
 
 summarizer_model_config: Optional[SummarizerConfig] = None
 summarizer: Optional[SummarizerInterface] = None
@@ -73,6 +77,10 @@ def get_summarizer():
 
 def get_card_generation():
     return card_generation
+
+
+def get_single_card_generation():
+    return single_flashcard_generation
 
 
 def get_deck_service():
