@@ -2,6 +2,22 @@ from bs4 import BeautifulSoup  # type: ignore
 from readability import Document  # type: ignore
 
 remove_words = ["\n", "\r", "\\n", "\\r"]
+title_tags = ["h1", "h2", "h3"]
+
+
+def extract_title(html: str) -> str:
+    soup = BeautifulSoup(html)
+
+    title = None
+
+    for tag in title_tags:
+        title_tag = soup.find(tag)
+
+        if title_tag:
+            title = title_tag.text
+            break
+
+    return title
 
 
 def extract_info(content: str) -> dict:

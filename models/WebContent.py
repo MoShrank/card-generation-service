@@ -17,9 +17,8 @@ class WebContent(BaseModel):
     url: str
     title: str
     content: str
-    summarise: bool
-    summary: Optional[str]
-    thumbnail: Optional[str]
+    html: str
+    summary: str
     created_at: datetime
     updated_at: datetime
     deleted_at: Optional[datetime]
@@ -49,9 +48,7 @@ WebContentCreatedResponse = BaseResponse[WebContentResponseData]
 
 
 class WebContentRequest(BaseModel):
-    name: str
     url: str
-    summarise: bool
 
 
 class WebContentQA(BaseModel):

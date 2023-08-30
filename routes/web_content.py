@@ -22,7 +22,7 @@ from models.WebContent import (
     WebContentResponse,
     WebContentResponseData,
 )
-from text.extract_info import extract_info
+from text.html_extraction import extract_info, extract_title
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.Summarizer import SummarizerInterface
 from text.VectorStore import VectorStoreInterface
@@ -89,33 +89,36 @@ async def create_post(
             error="Failed to scrape web pag",
         )
 
+    title = extract_title(raw_content)
+
+    if not title:
+        title = info["title"]
+
     now = datetime.now()
 
     summary = None
 
-    if body.summarise:
-        try:
-            summary = summarizer(info["content"], userID)
-        except Exception as e:
-            logger.error(f"Failed to summarise webpage. Error: {e}")
-            raise HTTPException(
-                status_code=500,
-                message="Failed to summarise web page",
-                error="Failed to summarise web page",
-            )
+    try:
+        summary = summarizer(info["content"], userID)
+    except Exception as e:
+        logger.error(f"Failed to summarise webpage. Error: {e}")
+        raise HTTPException(
+            status_code=500,
+            message="Failed to summarise web page",
+            error="Failed to summarise web page",
+        )
 
     web_content = WebContent(
         user_id=userID,
         url=url,
-        name=body.name,
-        title=info["title"],
+        name=title,
+        title=title,
+        html=raw_content,
         content=info["content"],
-        summarise=body.summarise,
         created_at=now,
         updated_at=now,
         deleted_at=None,
         summary=summary,
-        thumbnail=None,
     )
 
     result = await web_content_repo.insert_one(web_content.dict(by_alias=True))
