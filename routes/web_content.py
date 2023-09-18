@@ -72,7 +72,7 @@ async def create_post(
     content_extractor = ContentExtractor()
 
     try:
-        info = content_extractor(src)
+        content = content_extractor(src)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -82,8 +82,11 @@ async def create_post(
 
     now = datetime.now()
 
+    text = content.content
+    title = content.title
+
     try:
-        summary = summarizer(info["content"], userID)
+        summary = summarizer(text, userID)
     except Exception as e:
         logger.error(f"Failed to summarise webpage. Error: {e}")
         raise HTTPException(
@@ -92,8 +95,7 @@ async def create_post(
             error="Failed to summarise web page",
         )
 
-    title = info["title"]
-    raw_content = info["raw_content"]
+    raw_content = content.raw_content
 
     web_content = WebContent(
         user_id=userID,
@@ -101,7 +103,7 @@ async def create_post(
         name=title,
         title=title,
         html=raw_content,
-        content=info["content"],
+        content=text,
         created_at=now,
         updated_at=now,
         deleted_at=None,
@@ -119,7 +121,7 @@ async def create_post(
     )
 
     vector_store.add_document(
-        info["content"], {"user_id": userID, "source_id": str(result.inserted_id)}
+        text, {"user_id": userID, "source_id": str(result.inserted_id)}
     )
 
     return WebContentCreatedResponse(message="succes", data=webContent)
