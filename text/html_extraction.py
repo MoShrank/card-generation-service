@@ -1,3 +1,5 @@
+from typing import Optional
+
 from bs4 import BeautifulSoup  # type: ignore
 from readability import Document  # type: ignore
 
@@ -5,7 +7,7 @@ remove_words = ["\n", "\r", "\\n", "\\r"]
 title_tags = ["h1", "h2", "h3"]
 
 
-def extract_title(html: str) -> str:
+def extract_title(html: str) -> Optional[str]:
     soup = BeautifulSoup(html)
 
     title = None

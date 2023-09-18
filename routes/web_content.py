@@ -22,11 +22,10 @@ from models.WebContent import (
     WebContentResponse,
     WebContentResponseData,
 )
-from text.html_extraction import extract_info, extract_title
+from text.content.ContentExtractor import ContentExtractor
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.Summarizer import SummarizerInterface
 from text.VectorStore import VectorStoreInterface
-from util.scraper import get_content
 
 logger = logging.getLogger(__name__)
 
@@ -68,35 +67,20 @@ async def create_post(
     summarizer: SummarizerInterface = Depends(get_summarizer),
     vector_store: VectorStoreInterface = Depends(get_vector_store),
 ) -> WebContentCreatedResponse:
-    url = body.url
+    src = body.url
+
+    content_extractor = ContentExtractor()
 
     try:
-        raw_content = get_content(url)
+        info = content_extractor(src)
     except Exception as e:
-        logger.error(f"Failed to extract info from webpage. Error: {e}")
         raise HTTPException(
             status_code=500,
-            message="Failed to scrape web page",
-            error="Failed to scrape web pag",
+            message="Failed to get Content. If you want to get a webpage, make sure that you add http at the beginning.",
+            error=e.message,
         )
-    try:
-        info = extract_info(raw_content)
-    except Exception as e:
-        logger.error(f"Failed to extract info from webpage. Error: {e}")
-        raise HTTPException(
-            status_code=500,
-            message="Failed to scrape web page",
-            error="Failed to scrape web pag",
-        )
-
-    title = extract_title(raw_content)
-
-    if not title:
-        title = info["title"]
 
     now = datetime.now()
-
-    summary = None
 
     try:
         summary = summarizer(info["content"], userID)
@@ -108,9 +92,12 @@ async def create_post(
             error="Failed to summarise web page",
         )
 
+    title = info["title"]
+    raw_content = info["raw_content"]
+
     web_content = WebContent(
         user_id=userID,
-        url=url,
+        url=src,
         name=title,
         title=title,
         html=raw_content,
