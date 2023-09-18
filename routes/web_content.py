@@ -23,11 +23,9 @@ from models.WebContent import (
     WebContentResponseData,
 )
 from text.content.ContentExtractor import ContentExtractor
-from text.html_extraction import extract_info, extract_title
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.Summarizer import SummarizerInterface
 from text.VectorStore import VectorStoreInterface
-from util.scraper import get_content
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +76,7 @@ async def create_post(
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            message="Failed to extract content from source",
+            message="Failed to get Content. If you want to get a webpage, make sure that you add http at the beginning.",
             error=e.message,
         )
 

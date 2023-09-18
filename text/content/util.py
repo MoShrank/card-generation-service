@@ -3,9 +3,9 @@ import logging
 
 import PyPDF2
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
 
-from text.content.Content import Content
+from text.content import Content
 from text.html_extraction import extract_info, extract_title
 from util.error import retry_on_exception
 from util.scraper import get_content
@@ -33,7 +33,12 @@ def get_pdf_from_scihub(src: str) -> bytes:
 
 def get_info_from_pdf(pdf: bytes) -> Content:
     pdf_reader = PyPDF2.PdfFileReader(io.BytesIO(pdf))
-    title = pdf_reader.getDocumentInfo().title
+    info = pdf_reader.getDocumentInfo()
+
+    title = ""
+
+    if info and info.title:
+        title = info.title
 
     text = ""
 
@@ -43,11 +48,17 @@ def get_info_from_pdf(pdf: bytes) -> Content:
     return Content(title=title, content=text, raw_content=text)
 
 
-def get_text_from_paper_src(src: str) -> str:
-    # TODO error handling
-    pdf = get_pdf_from_scihub(src)
-    info = get_info_from_pdf(pdf)
-
+def get_text_from_paper_src(src: str) -> Content:
+    try:
+        pdf = get_pdf_from_scihub(src)
+    except Exception as e:
+        logger.error(f"Failed to get pdf from scihub: {e}")
+        raise Exception from e
+    try:
+        info = get_info_from_pdf(pdf)
+    except Exception as e:
+        logger.error(f"Failed to extract info from pdf: {e}")
+        raise Exception from e
     return info
 
 
@@ -56,15 +67,13 @@ def get_text_from_webpage(url: str) -> Content:
         raw_content = get_content(url)
     except Exception as e:
         logger.error(f"Failed to extract info from webpage. Error: {e}")
-        # raise exception
+        raise Exception from e
     try:
         info = extract_info(raw_content)
     except Exception as e:
         logger.error(f"Failed to extract info from webpage. Error: {e}")
-        # raise exception
+        raise Exception from e
 
-    title = extract_title(raw_content)
-    if not title:
-        title = info["title"]
+    title = extract_title(raw_content) or info["title"]
 
     return Content(title=title, content=info["content"], raw_content=raw_content)
