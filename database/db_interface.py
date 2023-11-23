@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, Optional
+
+from models.PyObjectID import PyObjectID
 
 
 class DBInterface(ABC):
@@ -21,4 +23,8 @@ class DBInterface(ABC):
 
     @abstractmethod
     async def delete_one(self, query: Dict) -> Any:
+        pass
+
+    @abstractmethod
+    async def find_by_id(self, id: str | PyObjectID, query: Optional[dict]) -> Dict:
         pass

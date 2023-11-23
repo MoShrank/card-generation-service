@@ -6,7 +6,7 @@ authors = ["Moritz Eich <hey@moritz.dev>"]
 
 [tool.poetry.dependencies]
 python = "3.11.*"
-fastapi = "^0.95.0"
+fastapi = "^0.104.1"
 openai = "^0.27.0"
 python-dotenv = "^0.19.2"
 slowapi = "^0.1.5"
@@ -24,6 +24,10 @@ uvicorn = {extras = ["standard"], version = "^0.23.0"}
 lxml = "^4.9.3"
 chromadb = "^0.4.7"
 pypdf2 = "^3.0.1"
+modal = "^0.55.4094"
+pymupdf = "^1.23.6"
+pillow = "^10.1.0"
+python-multipart = "^0.0.6"
 
 
 [tool.poetry.group.dev.dependencies]

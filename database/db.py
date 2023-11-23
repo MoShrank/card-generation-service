@@ -1,10 +1,11 @@
 import logging
-from typing import Dict
+from typing import Dict, Optional
 
 import motor.motor_asyncio
 
 from config import env_config
 from database.db_interface import DBInterface
+from models.PyObjectID import PyObjectID
 
 logger = logging.getLogger(__name__)
 
@@ -57,3 +58,13 @@ class DBOperations(DBInterface):
 
     async def delete_one(self, query):
         return await self._collection.delete_one(query)
+
+    async def find_by_id(self, id: str | PyObjectID, query: dict | None) -> Dict:
+        query = query or {}
+
+        if isinstance(id, str):
+            id = PyObjectID(id)
+
+        query["_id"] = id
+
+        return await self._collection.find_one(query)

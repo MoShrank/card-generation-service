@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional
 
 from fastapi import Depends
@@ -18,6 +19,7 @@ from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMoc
 from text.chroma_client import chroma_client
 from text.GPTInterface import GPTInterface
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
+from text.SciPDFToMD import SciPDFToMD
 from text.Summarizer import SummarizerInterface
 from text.TextSplitter import TextSplitter
 from text.VectorStore import VectorStore
@@ -26,6 +28,16 @@ NOTES_COLLECTION = "note"
 USER_COLLECTION = "openaiUser"
 OPENAI_CONFIG_COLLECTION = "modelConfig"
 WEBCONTENT_COLLECTION = "webContent"
+PDF_COLLECTION = "pdf"
+
+
+class Collections(Enum):
+    NOTES = NOTES_COLLECTION
+    USER = USER_COLLECTION
+    OPENAI_CONFIG = OPENAI_CONFIG_COLLECTION
+    WEBCONTENT = WEBCONTENT_COLLECTION
+    PDF = PDF_COLLECTION
+
 
 model_config: Optional[CardGenerationConfig] = None
 card_generation: Optional[CardGenerationInterface] = None
@@ -41,6 +53,8 @@ question_answer_gpt: Optional[QuestionAnswerGPTInterface] = None
 
 text_splitter = TextSplitter(1000, 70)
 vector_store = VectorStore(text_splitter, chroma_client, 3)
+
+pdf_to_md = SciPDFToMD()
 
 deck_service = DeckServiceAPI(env_config)
 
@@ -70,6 +84,13 @@ def get_user_repo(db_connection: DBConnection = Depends(get_db_connection)):
 
 def get_web_content_repo(db_connection: DBConnection = Depends(get_db_connection)):
     return DBOperations(WEBCONTENT_COLLECTION, db_connection)
+
+
+def get_repo(collection: str):
+    def repo(db_connection: DBConnection = Depends(get_db_connection)):
+        return DBOperations(collection, db_connection)
+
+    return repo
 
 
 def get_summarizer():
@@ -102,3 +123,7 @@ def get_question_answer_gpt():
 
 def get_vector_store():
     return vector_store
+
+
+def get_pdf_to_md():
+    return pdf_to_md

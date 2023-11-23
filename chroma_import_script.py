@@ -13,10 +13,20 @@ CHROMA_HOST = env_config.CHROMA_HOST
 async def main():
     client = motor.motor_asyncio.AsyncIOMotorClient(CONN_STRING)
     db = client["spacey"]
-    collection = "webContent"
+    web_content_collection = "webContent"
+    pdf_collection_name = "pdf"
 
-    web_content = db[collection]
+    web_content = db[web_content_collection]
     web_content_entries = await web_content.find({}).to_list(length=1000)
+
+    pdf = db[pdf_collection_name]
+    pdf_entries = await pdf.find({}).to_list(length=1000)
+
+    pdf_entries = [
+        pdf_entry
+        for pdf_entry in pdf_entries
+        if pdf_entry["processing_status"] == "processed"
+    ]
 
     ts = TextSplitter(1000, 70)
     vs = VectorStore(ts, chroma_client)
@@ -25,10 +35,19 @@ async def main():
         web_content_entrie["content"] for web_content_entrie in web_content_entries
     ]
 
+    documents.extend([pdf_entry["extracted_markdown"] for pdf_entry in pdf_entries])
+
     metadata = [
         {"source_id": str(entry["_id"]), "user_id": entry["user_id"]}
         for entry in web_content_entries
     ]
+
+    metadata.extend(
+        [
+            {"source_id": str(entry["_id"]), "user_id": entry["user_id"]}
+            for entry in pdf_entries
+        ]
+    )
 
     vs.add_documents(documents, metadata)  # type: ignore
 
