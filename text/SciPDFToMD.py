@@ -1,6 +1,6 @@
 import io
 
-import fitz
+import fitz  # type: ignore
 import modal
 from modal.functions import FunctionCall
 
