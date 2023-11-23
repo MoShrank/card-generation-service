@@ -191,7 +191,13 @@ async def update_cards(
 
     await note_repo.update_one(
         {"_id": PyObjectID(id), "user_id": userID},
-        {"$set": {"cards": new_cards, "card_edited_at": now, "cards_edited": True}},
+        {
+            "$set": {
+                "cards": [card.dict() for card in new_cards],
+                "card_edited_at": now,
+                "cards_edited": True,
+            }
+        },
     )
 
     data = UpdatedCardsResponseData(cards=new_cards)
