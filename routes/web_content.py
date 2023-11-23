@@ -199,7 +199,6 @@ async def get_answer(
     )
 
 
-# route that should serve as a search endpoint for all articles
 @router.get(
     "/search",
     response_model=WebContentResponse,

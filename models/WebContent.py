@@ -42,8 +42,6 @@ class WebContentResponse(BaseResponse):
     data: list[WebContentResponseData]
 
 
-# WebContentResponse = BaseResponse[list[WebContentResponseData]]
-
 WebContentCreatedResponse = BaseResponse[WebContentResponseData]
 
 

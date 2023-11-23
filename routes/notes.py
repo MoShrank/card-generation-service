@@ -16,7 +16,7 @@ from dependencies import (
 )
 from external.CardGeneration import CardGenerationInterface
 from external.DeckServiceAPI import DeckServiceAPIInterface
-from models.HttpModels import EmptyResponse, HTTPException
+from models.HttpModels import HTTPException
 from models.Note import (
     AddedCardsResponse,
     AddedCardsResponseData,
