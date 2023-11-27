@@ -50,7 +50,7 @@ class VectorStore(VectorStoreInterface):
     def __init__(
         self,
         document_splitter: TextSplitterInterface,
-        chroma_client: chromadb.API = chroma_client,
+        chroma_client: chromadb.Client = chroma_client,
         max_query_results: int = 5,
     ):
         default_ef = embedding_functions.DefaultEmbeddingFunction()
