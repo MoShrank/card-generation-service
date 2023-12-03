@@ -7,12 +7,10 @@ from nltk.tokenize import sent_tokenize  # type: ignore
 
 from external.gpt import (
     calculate_chat_gpt_token_size,
-    get_chatgpt_completion,
     get_no_tokens,
 )
 from models.ModelConfig import Message, Messages, SummarizerConfig
 from text.GPTInterface import GPTInterface
-from util.error import retry_on_exception
 
 
 class SummarizerInterface(ABC):

@@ -19,7 +19,7 @@ from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMoc
 from text.chroma_client import chroma_client
 from text.GPTInterface import GPTInterface
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
-from text.SciPDFToMD import SciPDFToMD
+from text.SciPDFToMD import SciPDFToMDInterface
 from text.Summarizer import SummarizerInterface
 from text.TextSplitter import TextSplitter
 from text.VectorStore import VectorStore
@@ -54,7 +54,7 @@ question_answer_gpt: Optional[QuestionAnswerGPTInterface] = None
 text_splitter = TextSplitter(1000, 70)
 vector_store = VectorStore(text_splitter, chroma_client, 3)
 
-pdf_to_md = SciPDFToMD()
+pdf_to_md = Optional[SciPDFToMDInterface]
 
 deck_service = DeckServiceAPI(env_config)
 

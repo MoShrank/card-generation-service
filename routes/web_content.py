@@ -112,8 +112,10 @@ async def create_post(
 
     result = await web_content_repo.insert_one(web_content.dict(by_alias=True))
 
+    result_id = str(result.inserted_id)
+
     webContent = WebContentResponseData(
-        _id=result.inserted_id,
+        id=result_id,
         url=web_content.url,
         summary=web_content.summary,
         name=web_content.name,

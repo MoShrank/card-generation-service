@@ -2,12 +2,13 @@ import io
 import logging
 from datetime import datetime
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from pydantic import parse_obj_as
 
 from database.db_interface import DBInterface
 from dependencies import Collections, get_pdf_to_md, get_repo, get_vector_store
+from models.HttpModels import EmptyResponse, HTTPException
 from models.PDF import (
     PDFModel,
     PDFPostRes,
@@ -18,7 +19,7 @@ from models.PDF import (
     PDFSearchResponseData,
 )
 from models.PyObjectID import PyObjectID
-from text import SciPDFToMD
+from text.SciPDFToMD import SciPDFToMDInterface
 from text.VectorStore import VectorStoreInterface
 
 logger = logging.getLogger(__name__)
@@ -34,11 +35,11 @@ router = APIRouter(
 async def pdf_to_markdown(
     id: str,
     user_id: str,
-    pdf: io.BytesIO,
+    pdf: bytes,
     repo: DBInterface,
-    pdf_to_md: SciPDFToMD,
+    pdf_to_md: SciPDFToMDInterface,
     vector_store: VectorStoreInterface,
-) -> str:
+):
     markdown = None
     status = "failed"
 
@@ -70,28 +71,36 @@ async def pdf_to_markdown(
     )
 
 
-@router.get("/", response_model=PDFResponse)
+@router.get(
+    "",
+    response_model=PDFResponse,
+    response_model_by_alias=False,
+)
 async def get_pdf(
     userID: str,
     pdf_repo: DBInterface = Depends(repo),
 ) -> PDFResponse:
     pdfs = await pdf_repo.query({"user_id": userID})
 
-    pdfs = parse_obj_as(list[PDFResData], pdfs)
+    parsed_pdfs = parse_obj_as(list[PDFResData], pdfs)
 
     return PDFResponse(
-        data=pdfs,
+        data=parsed_pdfs,
         message="Successfully retrieved pdfs",
     )
 
 
-@router.post("", response_model=PDFPostRes)
+@router.post(
+    "",
+    response_model=PDFPostRes,
+    response_model_by_alias=False,
+)
 async def create_pdf(
     background_tasks: BackgroundTasks,
     userID: str,
     file: UploadFile = File(...),
     pdf_repo: DBInterface = Depends(repo),
-    pdf_to_md: SciPDFToMD = Depends(get_pdf_to_md),
+    pdf_to_md: SciPDFToMDInterface = Depends(get_pdf_to_md),
     vector_store: VectorStoreInterface = Depends(get_vector_store),
 ):
     pdf_file_content = await file.read()
@@ -99,16 +108,31 @@ async def create_pdf(
     now = datetime.now()
     status = "processing"
 
-    pdf = PDFModel(
-        user_id=userID,
-        pdf=pdf_file_content,
-        processing_status=status,
-        created_at=now,
-        updated_at=now,
-    )
+    try:
+        pdf = PDFModel(
+            user_id=userID,
+            processing_status=status,
+            created_at=now,
+            updated_at=now,
+        )
+    except Exception as e:
+        logger.error(f"Failed to create pdf: {e}")
+        raise HTTPException(
+            status_code=400,
+            message="Failed to create pdf",
+            error="Failed to create pdf",
+        )
 
-    result = await pdf_repo.insert_one(pdf.dict(by_alias=True))
-    pdf_id = result.inserted_id
+    try:
+        result = await pdf_repo.insert_one(pdf.dict(by_alias=True))
+        pdf_id = result.inserted_id
+    except Exception as e:
+        logger.error(f"Failed to save pdf to database: {e}")
+        raise HTTPException(
+            status_code=500,
+            message="Failed to create pdf",
+            error="Failed to save pdf to database",
+        )
 
     background_tasks.add_task(
         pdf_to_markdown,
@@ -123,10 +147,23 @@ async def create_pdf(
     return PDFPostRes(
         message="Successfully created pdf",
         data=PDFPostResData(
-            _id=pdf_id,
-            status=status,
+            id=str(pdf_id),
+            processing_status=status,
         ),
     )
+
+
+@router.delete("/{pdf_id}")
+async def delete_pdf(
+    userID: str,
+    pdf_id: str,
+    pdf_repo: DBInterface = Depends(repo),
+) -> EmptyResponse:
+    obj_id = PyObjectID(pdf_id)
+
+    await pdf_repo.delete_one({"_id": obj_id, "user_id": userID})
+
+    return EmptyResponse(message="Successfully deleted pdf")
 
 
 @router.get("/{pdf_id}/search")

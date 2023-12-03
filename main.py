@@ -22,6 +22,7 @@ from routes.pdf import router as pdf_router
 from routes.web_content import router as web_content_router
 from text.chroma_client import import_data, wait_for_chroma_connection
 from text.QuestionAnswerGPT import QuestionAnswerGPT
+from text.SciPDFToMD import SciPDFToMD, SciPDFToMDMock
 from text.SingleFlashcardGenerator import (
     SingleFlashcardGenerator,
     SingleFlashcardGeneratorMock,
@@ -75,12 +76,15 @@ async def setup_prod_env():
         single_flashcard_model_config, env_config.OPENAI_API_KEY
     )
 
+    dependencies.pdf_to_md = SciPDFToMD()
+
 
 async def setup_dev_env():
     logger.info("Development environment detected")
     dependencies.card_generation = CardGenerationMock()
     dependencies.summarizer = SummarizerMock()
     dependencies.single_flashcard_generation = SingleFlashcardGeneratorMock()
+    dependencies.pdf_to_md = SciPDFToMDMock()
 
 
 env_setups = {"production": setup_prod_env, "development": setup_dev_env}

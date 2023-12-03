@@ -1,11 +1,23 @@
 import io
+from abc import ABC, abstractmethod
 
 import fitz  # type: ignore
 import modal
 from modal.functions import FunctionCall
 
 
-class SciPDFToMD:
+class SciPDFToMDInterface(ABC):
+    @abstractmethod
+    def __call__(self, pdf: io.BytesIO) -> str:
+        pass
+
+
+class SciPDFToMDMock(SciPDFToMDInterface):
+    def __call__(self, pdf: io.BytesIO) -> str:
+        return "This is a mock"
+
+
+class SciPDFToMD(SciPDFToMDInterface):
     _dpi: int = 96
     _modal_app_name: str = "nougat-ocr"
     _modal_function_name: str = "img_to_md"

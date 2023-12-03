@@ -1,7 +1,8 @@
 import logging
-from typing import Dict, Optional
+from typing import Dict
 
 import motor.motor_asyncio
+from pymongo.results import InsertOneResult, UpdateResult
 
 from config import env_config
 from database.db_interface import DBInterface

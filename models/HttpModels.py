@@ -1,6 +1,5 @@
 from typing import Generic, TypeVar
 
-from bson import ObjectId
 from pydantic import BaseModel
 
 DataT = TypeVar("DataT")

@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
+from pymongo.results import InsertOneResult, UpdateResult
+
 from models.PyObjectID import PyObjectID
 
 
 class DBInterface(ABC):
     @abstractmethod
-    async def insert_one(self, document: Dict) -> Dict:
+    async def insert_one(self, document: Dict) -> InsertOneResult:
         pass
 
     @abstractmethod
@@ -18,7 +20,7 @@ class DBInterface(ABC):
         pass
 
     @abstractmethod
-    async def update_one(self, query: Dict, update: Dict) -> Dict:
+    async def update_one(self, query: Dict, update: Dict) -> UpdateResult:
         pass
 
     @abstractmethod
