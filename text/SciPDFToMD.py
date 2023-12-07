@@ -1,4 +1,5 @@
 import io
+import re
 from abc import ABC, abstractmethod
 
 import fitz  # type: ignore
@@ -46,13 +47,26 @@ class SciPDFToMD(SciPDFToMDInterface):
 
         result = function_call.get(timeout=timeout_s)
 
-        markdown = "\n\n".join(result)
+        markdown = self._postprocess(result)
 
         return markdown
 
     def _predict(self, images: list) -> str:
         res = self._modal_pred_fn.spawn(images)
         return res.object_id
+
+    def _replace_delimiters(self, text: str) -> str:
+        text = re.sub(r"\\\((.*?)\\\)", r"$\1$", text)
+        text = re.sub(r"\\\[(.*?)\\\]", r"$$\1$$", text)
+
+        return text
+
+    def _postprocess(self, markdown: list[str]) -> str:
+        markdown_post_processed = "\n\n".join(markdown)
+
+        markdown_post_processed = self._replace_delimiters(markdown_post_processed)
+
+        return markdown_post_processed
 
     def _pdf_to_images(self, pdf: io.BytesIO) -> list:
         images = []

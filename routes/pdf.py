@@ -7,7 +7,13 @@ from fastapi.concurrency import run_in_threadpool
 from pydantic import parse_obj_as
 
 from database.db_interface import DBInterface
-from dependencies import Collections, get_pdf_to_md, get_repo, get_vector_store
+from dependencies import (
+    Collections,
+    get_pdf_storage,
+    get_pdf_to_md,
+    get_repo,
+    get_vector_store,
+)
 from models.HttpModels import EmptyResponse, HTTPException
 from models.PDF import (
     PDFModel,
@@ -19,6 +25,7 @@ from models.PDF import (
     PDFSearchResponseData,
 )
 from models.PyObjectID import PyObjectID
+from text.PDFStorage import PDFStorageInterface
 from text.SciPDFToMD import SciPDFToMDInterface
 from text.VectorStore import VectorStoreInterface
 
@@ -39,9 +46,12 @@ async def pdf_to_markdown(
     repo: DBInterface,
     pdf_to_md: SciPDFToMDInterface,
     vector_store: VectorStoreInterface,
+    pdf_storage: PDFStorageInterface,
 ):
     markdown = None
     status = "failed"
+
+    storage_reference = pdf_storage.upload_pdf(user_id, id, io.BytesIO(pdf))
 
     try:
         markdown = await run_in_threadpool(lambda: pdf_to_md(pdf))
@@ -66,6 +76,7 @@ async def pdf_to_markdown(
                 "extracted_markdown": markdown,
                 "processing_status": status,
                 "updated_at": datetime.now(),
+                "storage_reference": storage_reference,
             },
         },
     )
@@ -102,6 +113,7 @@ async def create_pdf(
     pdf_repo: DBInterface = Depends(repo),
     pdf_to_md: SciPDFToMDInterface = Depends(get_pdf_to_md),
     vector_store: VectorStoreInterface = Depends(get_vector_store),
+    pdf_storage: PDFStorageInterface = Depends(get_pdf_storage),
 ):
     pdf_file_content = await file.read()
 
@@ -142,6 +154,7 @@ async def create_pdf(
         pdf_repo,
         pdf_to_md,
         vector_store,
+        pdf_storage,
     )
 
     return PDFPostRes(

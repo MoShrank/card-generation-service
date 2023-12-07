@@ -28,6 +28,9 @@ class EnvConfig(BaseSettings):
         None, env="SINGLE_FLASHCARD_GENERATOR_CONFIG_ID"
     )
 
+    AWS_SECRET_KEY: str = Field(None, env="AWS_SECRET_KEY")
+    AWS_ACCESS_KEY: str = Field(None, env="AWS_ACCESS_KEY")
+
     @validator("LOG_LEVEL", pre=True)
     def transform_log_level(cls, log_level):
         return log_level.upper()

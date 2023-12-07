@@ -18,6 +18,7 @@ from models.ModelConfig import (
 from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
 from text.chroma_client import chroma_client
 from text.GPTInterface import GPTInterface
+from text.PDFStorage import PDFStorage, PDFStorageInterface
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.SciPDFToMD import SciPDFToMDInterface
 from text.Summarizer import SummarizerInterface
@@ -55,6 +56,7 @@ text_splitter = TextSplitter(1000, 70)
 vector_store = VectorStore(text_splitter, chroma_client, 3)
 
 pdf_to_md = Optional[SciPDFToMDInterface]
+pdf_storage = PDFStorage(env_config)
 
 deck_service = DeckServiceAPI(env_config)
 
@@ -127,3 +129,7 @@ def get_vector_store():
 
 def get_pdf_to_md():
     return pdf_to_md
+
+
+def get_pdf_storage():
+    return pdf_storage

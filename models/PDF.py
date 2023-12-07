@@ -16,6 +16,7 @@ class PDFModel(BaseModel):
     id: PyObjectID = Field(default_factory=PyObjectID, alias="_id")
     user_id: str
     title: Optional[str]
+    storage_ref: Optional[str]
     extracted_markdown: Optional[str]
     summary: Optional[str]
     processing_status: ProcessingStatus
