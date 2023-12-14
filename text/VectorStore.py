@@ -1,25 +1,31 @@
 from abc import ABC, abstractmethod
-from typing import Literal, Mapping, Optional, Union
+from typing import Literal, Optional, TypedDict
 from uuid import uuid4
 
-import chromadb  # type: ignore
-from chromadb.utils import embedding_functions  # type: ignore
+from chromadb.api import ClientAPI
+from chromadb.utils import embedding_functions
 
 from text.chroma_client import chroma_client
 from text.TextSplitter import TextSplitterInterface
 
 COLLECTION_NAME = "webContent"
 
-Metadata = Mapping[str, Union[str, int, float]]
-
 Include = list[
-    Union[
-        Literal["documents"],
-        Literal["embeddings"],
-        Literal["metadatas"],
-        Literal["distances"],
-    ]
+    Literal["documents", "embeddings", "metadatas", "distances", "uris", "data"]
 ]
+
+
+class MetaData(TypedDict):
+    source_id: str
+    user_id: str
+
+
+class QueryResult(TypedDict):
+    ids: list[str]
+    documents: list[str]
+    metadatas: list[MetaData]
+    distances: list[float]
+
 
 SearchQueryOperators = Literal["$and", "$or"]
 SearchQuery = dict[SearchQueryOperators, list[dict[str, str]]]
@@ -29,11 +35,11 @@ SearchQuery = dict[SearchQueryOperators, list[dict[str, str]]]
 
 class VectorStoreInterface(ABC):
     @abstractmethod
-    def add_document(self, document: str, metadata: Optional[Metadata] = None):
+    def add_document(self, document: str, metadata: MetaData):
         pass
 
     @abstractmethod
-    def add_documents(self, documents: list[str], metadatas: list[Metadata]):
+    def add_documents(self, documents: list[str], metadatas: list[MetaData]):
         pass
 
     @abstractmethod
@@ -41,8 +47,7 @@ class VectorStoreInterface(ABC):
         self,
         query: str,
         filter_values: dict[str, str],
-        include: Include = ["documents"],
-    ) -> dict:
+    ) -> QueryResult:
         pass
 
 
@@ -50,13 +55,13 @@ class VectorStore(VectorStoreInterface):
     def __init__(
         self,
         document_splitter: TextSplitterInterface,
-        chroma_client: chromadb.Client = chroma_client,
+        chroma_client: ClientAPI = chroma_client,
         max_query_results: int = 5,
     ):
         default_ef = embedding_functions.DefaultEmbeddingFunction()
 
         self._collection = chroma_client.get_or_create_collection(
-            name=COLLECTION_NAME, embedding_function=default_ef
+            name=COLLECTION_NAME, embedding_function=default_ef  # type: ignore
         )
 
         self._max_query_results = max_query_results
@@ -64,20 +69,20 @@ class VectorStore(VectorStoreInterface):
         self._overlap = 100
         self._document_splitter = document_splitter
 
-    def add_document(self, document: str, metadata: Optional[Metadata] = None):
+    def add_document(self, document: str, metadata: MetaData):
         split_documents = self._document_splitter(document)
 
         ids = [self._generate_id() for _ in split_documents]
 
-        metadatas = [metadata for _ in split_documents] if metadata else None
+        metadatas = [metadata for _ in split_documents]
 
         self._collection.add(
             documents=split_documents,
             ids=ids,
-            metadatas=metadatas,
+            metadatas=metadatas,  # type: ignore
         )
 
-    def add_documents(self, documents: list[str], metadatas: list[Metadata]):
+    def add_documents(self, documents: list[str], metadatas: list[MetaData]):
         for document, metadata in zip(documents, metadatas):
             self.add_document(document, metadata)
 
@@ -99,18 +104,22 @@ class VectorStore(VectorStoreInterface):
         self,
         query: str,
         filter_values: dict[str, str],
-        include: Include = ["documents"],
-    ) -> dict:
+    ) -> QueryResult:
         query_filter = self._compose_and_filter(filter_values)
 
         results = self._collection.query(
             query_texts=[query],
             n_results=self._max_query_results,
             where=query_filter,
-            include=include,
+            include=["documents", "metadatas", "distances"],
         )
 
-        return results
+        return {
+            "ids": results["ids"][0],
+            "documents": results["documents"][0] if results["documents"] else [],
+            "metadatas": results["metadatas"][0] if results["metadatas"] else [],  # type: ignore
+            "distances": results["distances"][0] if results["distances"] else [],
+        }
 
     def _generate_id(self) -> str:
         return str(uuid4())

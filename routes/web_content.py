@@ -77,7 +77,7 @@ async def create_post(
         raise HTTPException(
             status_code=500,
             message="Failed to get Content. If you want to get a webpage, make sure that you add http at the beginning.",
-            error=e.message,
+            error=str(e),
         )
 
     now = datetime.now()
@@ -181,7 +181,7 @@ async def get_answer(
         "source_id": postID,
     }
 
-    documents = vector_store.query(web_content["content"], filter)["documents"][0]
+    documents = vector_store.query(web_content["content"], filter)["documents"]
 
     if not documents:
         raise HTTPException(
@@ -216,7 +216,7 @@ async def search_posts(
         "user_id": userID,
     }
 
-    metadatas = vector_store.query(query, filter, include=["metadatas"])["metadatas"][0]
+    metadatas = vector_store.query(query, filter)["metadatas"]
 
     articles = []
 

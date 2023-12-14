@@ -18,7 +18,7 @@ from models.ModelConfig import (
 from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
 from text.chroma_client import chroma_client
 from text.GPTInterface import GPTInterface
-from text.PDFStorage import PDFStorage, PDFStorageInterface
+from text.PDFStorage import PDFStorage
 from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.SciPDFToMD import SciPDFToMDInterface
 from text.Summarizer import SummarizerInterface

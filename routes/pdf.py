@@ -23,6 +23,7 @@ from models.PDF import (
     PDFResponse,
     PDFSearchResponse,
     PDFSearchResponseData,
+    ProcessingStatus,
 )
 from models.PyObjectID import PyObjectID
 from text.PDFStorage import PDFStorageInterface
@@ -60,12 +61,13 @@ async def pdf_to_markdown(
         logger.error(f"Failed to convert pdf to markdown: {e}")
 
     if markdown:
-        metadata = {
-            "source_id": id,
-            "user_id": user_id,
-        }
-
-        vector_store.add_document(markdown, metadata)
+        vector_store.add_document(
+            markdown,
+            {
+                "source_id": id,
+                "user_id": user_id,
+            },
+        )
 
     obj_id = PyObjectID(id)
 
@@ -118,7 +120,7 @@ async def create_pdf(
     pdf_file_content = await file.read()
 
     now = datetime.now()
-    status = "processing"
+    status: ProcessingStatus = "processing"
 
     try:
         pdf = PDFModel(
@@ -126,7 +128,13 @@ async def create_pdf(
             processing_status=status,
             created_at=now,
             updated_at=now,
+            title=None,
+            storage_ref=None,
+            extracted_markdown=None,
+            summary=None,
+            deleted_at=None,
         )
+
     except Exception as e:
         logger.error(f"Failed to create pdf: {e}")
         raise HTTPException(
@@ -207,7 +215,7 @@ async def search_pdf(
         "user_id": userID,
         "source_id": pdf_id,
     }
-    query_results = vector_store.query(query, filter)["documents"][0]
+    query_results = vector_store.query(query, filter)["documents"]
 
     markdown: str = pdf["extracted_markdown"]
     data = []
