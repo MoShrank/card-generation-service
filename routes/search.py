@@ -46,7 +46,7 @@ async def search(
         query,
         {
             "user_id": userID,
-            "source_types": INCLUDE_SOURCE_TYPES,
+            "source_type": INCLUDE_SOURCE_TYPES,
         },
     )
 
