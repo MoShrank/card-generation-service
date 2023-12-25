@@ -71,7 +71,7 @@ async def search(
 
     for source_type in INCLUDE_SOURCE_TYPES:
         if len(query_results[source_type]) > 0:
-            context_docs += query_results[source_type][0]
+            context_docs += query_results[source_type][0]["document"]
 
     context = build_gpt_context(context_docs)
 
