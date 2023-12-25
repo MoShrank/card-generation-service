@@ -123,7 +123,8 @@ async def create_post(
     )
 
     vector_store.add_document(
-        text, {"user_id": userID, "source_id": str(result.inserted_id)}
+        text,
+        {"user_id": userID, "source_id": str(result.inserted_id), "source_type": "web"},
     )
 
     return WebContentCreatedResponse(message="succes", data=webContent)
@@ -176,12 +177,14 @@ async def get_answer(
             error="Web page not found",
         )
 
-    filter = {
-        "user_id": userID,
-        "source_id": postID,
-    }
-
-    documents = vector_store.query(web_content["content"], filter)["documents"]
+    documents = vector_store.query(
+        web_content["content"],
+        {
+            "user_id": userID,
+            "source_id": postID,
+            "source_types": "web",
+        },
+    )["documents"]
 
     if not documents:
         raise HTTPException(
@@ -212,11 +215,13 @@ async def search_posts(
     web_content_repo: DBInterface = Depends(get_web_content_repo),
     vector_store: VectorStoreInterface = Depends(get_vector_store),
 ) -> WebContentResponse:
-    filter = {
-        "user_id": userID,
-    }
-
-    metadatas = vector_store.query(query, filter)["metadatas"]
+    metadatas = vector_store.query(
+        query,
+        {
+            "user_id": userID,
+            "source_types": "web",
+        },
+    )["metadatas"]
 
     articles = []
 

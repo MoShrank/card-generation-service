@@ -15,7 +15,7 @@ else:
 
 
 async def import_data():
-    collection = chroma_client.get_collection("webContent")
+    collection = chroma_client.get_collection("content")
 
     if collection.count() <= 0:
         from chroma_import_script import main

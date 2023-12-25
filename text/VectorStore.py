@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Literal, Optional, TypedDict
+from typing import Literal, NotRequired, Optional, TypedDict, cast
 from uuid import uuid4
 
 from chromadb.api import ClientAPI
@@ -8,15 +8,24 @@ from chromadb.utils import embedding_functions
 from text.chroma_client import chroma_client
 from text.TextSplitter import TextSplitterInterface
 
-COLLECTION_NAME = "webContent"
+COLLECTION_NAME = "content"
+
+SourceTypes = Literal["pdf", "web"]
 
 Include = list[
     Literal["documents", "embeddings", "metadatas", "distances", "uris", "data"]
 ]
 
 
+class QueryFilters(TypedDict):
+    source_id: NotRequired[str]
+    source_types: list[SourceTypes] | SourceTypes
+    user_id: str
+
+
 class MetaData(TypedDict):
     source_id: str
+    source_type: SourceTypes
     user_id: str
 
 
@@ -46,7 +55,7 @@ class VectorStoreInterface(ABC):
     def query(
         self,
         query: str,
-        filter_values: dict[str, str],
+        filter_values: QueryFilters,
     ) -> QueryResult:
         pass
 
@@ -96,16 +105,19 @@ class VectorStore(VectorStoreInterface):
         filter: SearchQuery = {"$and": []}
 
         for key, value in filter_values.items():
-            filter["$and"].append({key: value})
+            if isinstance(value, list):
+                filter["$and"].append({key: {"$in": value}})
+            elif value:
+                filter["$and"].append({key: value})
 
         return filter
 
     def query(
         self,
         query: str,
-        filter_values: dict[str, str],
+        filter_values: QueryFilters,
     ) -> QueryResult:
-        query_filter = self._compose_and_filter(filter_values)
+        query_filter = self._compose_and_filter(cast(dict[str, str], filter_values))
 
         results = self._collection.query(
             query_texts=[query],

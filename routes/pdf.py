@@ -64,6 +64,7 @@ async def pdf_to_markdown(
         vector_store.add_document(
             markdown,
             {
+                "source_type": "pdf",
                 "source_id": id,
                 "user_id": user_id,
             },

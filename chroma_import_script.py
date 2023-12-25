@@ -38,20 +38,28 @@ async def main():
     documents.extend([pdf_entry["extracted_markdown"] for pdf_entry in pdf_entries])
 
     metadata = [
-        {"source_id": str(entry["_id"]), "user_id": entry["user_id"]}
+        {
+            "source_id": str(entry["_id"]),
+            "user_id": entry["user_id"],
+            "source_type": "web",
+        }
         for entry in web_content_entries
     ]
 
     metadata.extend(
         [
-            {"source_id": str(entry["_id"]), "user_id": entry["user_id"]}
+            {
+                "source_id": str(entry["_id"]),
+                "user_id": entry["user_id"],
+                "source_type": "pdf",
+            }
             for entry in pdf_entries
         ]
     )
 
     vs.add_documents(documents, metadata)  # type: ignore
 
-    collection = chroma_client.get_collection(name="webContent")
+    collection = chroma_client.get_collection(name="content")
 
     print(f"Imported {collection.count()} documents!")
 

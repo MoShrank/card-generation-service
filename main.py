@@ -19,6 +19,7 @@ from models.ModelConfig import (
 from models.PyObjectID import PyObjectID
 from routes.notes import router as notes_router
 from routes.pdf import router as pdf_router
+from routes.search import router as search_router
 from routes.web_content import router as web_content_router
 from text.chroma_client import import_data, wait_for_chroma_connection
 from text.QuestionAnswerGPT import QuestionAnswerGPT
@@ -123,6 +124,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(notes_router)
 app.include_router(web_content_router)
 app.include_router(pdf_router)
+app.include_router(search_router)
 
 
 @app.exception_handler(HTTPException)
