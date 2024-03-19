@@ -8,7 +8,7 @@ from slowapi.errors import RateLimitExceeded
 
 import dependencies
 from config import env_config
-from external.CardGeneration import CardGeneration, CardGenerationMock
+from text.GPT.CardGeneration import CardGeneration, CardGenerationMock
 from models.HttpModels import HTTPException
 from models.ModelConfig import (
     CardGenerationConfig,
@@ -22,13 +22,13 @@ from routes.pdf import router as pdf_router
 from routes.search import router as search_router
 from routes.web_content import router as web_content_router
 from text.chroma_client import import_data, wait_for_chroma_connection
-from text.QuestionAnswerGPT import QuestionAnswerGPT
+from text.GPT.QuestionAnswerGPT import QuestionAnswerGPT
 from text.SciPDFToMD import SciPDFToMD, SciPDFToMDMock
-from text.SingleFlashcardGenerator import (
+from text.GPT.SingleFlashcardGenerator import (
     SingleFlashcardGenerator,
     SingleFlashcardGeneratorMock,
 )
-from text.Summarizer import Summarizer, SummarizerMock
+from text.GPT.Summarizer import Summarizer, SummarizerMock
 from util.limitier import limiter
 
 uvicorn_logger = logging.getLogger("uvicorn")

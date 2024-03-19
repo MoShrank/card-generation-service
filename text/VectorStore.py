@@ -19,7 +19,7 @@ Include = list[
 
 class QueryFilters(TypedDict):
     source_id: NotRequired[str]
-    source_type: list[SourceTypes] | SourceTypes
+    source_type: Optional[list[SourceTypes] | SourceTypes]
     user_id: str
 
 

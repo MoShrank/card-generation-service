@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+import openai
+
 from external.gpt import get_chatgpt_completion
 from models.ModelConfig import Messages, ModelConfig
 from util.error import retry_on_exception
@@ -8,6 +10,10 @@ from util.error import retry_on_exception
 
 class GPTInterface(ABC):
     _model_config: ModelConfig
+
+    def __init__(self, model_config: ModelConfig, openai_api_key: str) -> None:
+        self._model_config = model_config
+        openai.api_key = openai_api_key
 
     @abstractmethod
     def __call__(self, *args: Any, **kwds: Any) -> Any:

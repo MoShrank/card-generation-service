@@ -8,7 +8,7 @@ from models.SearchResults import (
     QuestionResponseData,
     SearchResult,
 )
-from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
+from text.GPT.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.VectorStore import SourceTypes, VectorStoreInterface
 
 logger = logging.getLogger(__name__)
@@ -72,8 +72,6 @@ async def search(
     for source_type in INCLUDE_SOURCE_TYPES:
         if len(query_results[source_type]) > 0:
             context_docs += query_results[source_type][0]["document"]
-
-    context = build_gpt_context(context_docs)
 
     if len(context_docs) > 0:
         answer = qa_gpt(context_docs, query, userID)

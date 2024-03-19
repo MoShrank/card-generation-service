@@ -49,28 +49,14 @@ class ModelConfig(BaseModel):
     id: PyObjectID = Field(default_factory=PyObjectID, alias="_id")
     parameters: ModelParameters
     max_model_tokens: int
+    system_message: str
 
 
 class SummarizerConfig(ModelConfig):
-    system_message: str
     user_message_prefix: str
 
 
-class SingleFlashcardGeneratorConfig(ModelConfig):
-    system_message: str
-
-
-class CardGenerationConfig(ModelConfig):
-    type: str
-    examples: List[Example]
-    card_prefix: str
-    note_prefix: str
-    prompt_prefix: str
-
-
 class QuestionAnswerGPTConfig(ModelConfig):
-    system_message: str
-
     @validator("system_message", allow_reuse=True)
     def system_message_contains_placeholders(cls, v):
         return create_contains_placeholders_validator("question")(cls, v)

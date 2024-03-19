@@ -29,7 +29,7 @@ class Note(MongoModel):
     cards_edited: bool
     cards: List[Card]
     cards_edited_at: Optional[datetime]
-    created_at: datetime
+    created_at: str
 
 
 # HTTP Handler models

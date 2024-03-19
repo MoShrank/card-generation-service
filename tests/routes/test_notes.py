@@ -12,10 +12,10 @@ from dependencies import (
     get_single_card_generation,
     get_user_repo,
 )
-from external.CardGeneration import CardGenerationMock
+from text.GPT.CardGeneration import CardGenerationMock
 from main import app
 from models.Note import Card, DeckServiceCard
-from text.SingleFlashcardGenerator import SingleFlashcardGeneratorMock
+from text.GPT.SingleFlashcardGenerator import SingleFlashcardGeneratorMock
 from util.AttrDict import AttrDict
 
 client = TestClient(app)

@@ -5,23 +5,19 @@ from fastapi import Depends
 
 from config import env_config
 from database.db import DBConnection, DBOperations
-from external.CardGeneration import (
-    CardGenerationInterface,
-)
 from external.DeckServiceAPI import DeckServiceAPI
 from models.ModelConfig import (
-    CardGenerationConfig,
+    ModelConfig,
     QuestionAnswerGPTConfig,
-    SingleFlashcardGeneratorConfig,
     SummarizerConfig,
 )
 from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
 from text.chroma_client import chroma_client
-from text.GPTInterface import GPTInterface
+from text.GPT.GPTInterface import GPTInterface
+from text.GPT.QuestionAnswerGPT import QuestionAnswerGPTInterface
+from text.GPT.Summarizer import SummarizerInterface
 from text.PDFStorage import PDFStorage
-from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.SciPDFToMD import SciPDFToMDInterface
-from text.Summarizer import SummarizerInterface
 from text.TextSplitter import TextSplitter
 from text.VectorStore import VectorStore
 
@@ -40,10 +36,10 @@ class Collections(Enum):
     PDF = PDF_COLLECTION
 
 
-model_config: Optional[CardGenerationConfig] = None
-card_generation: Optional[CardGenerationInterface] = None
+model_config: Optional[ModelConfig] = None
+card_generation: Optional[GPTInterface] = None
 
-single_flashcard_model_config: Optional[SingleFlashcardGeneratorConfig] = None
+single_flashcard_model_config: Optional[ModelConfig] = None
 single_flashcard_generation: Optional[GPTInterface] = None
 
 summarizer_model_config: Optional[SummarizerConfig] = None

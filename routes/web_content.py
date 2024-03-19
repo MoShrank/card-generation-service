@@ -23,8 +23,8 @@ from models.WebContent import (
     WebContentResponseData,
 )
 from text.content.ContentExtractor import ContentExtractor
-from text.QuestionAnswerGPT import QuestionAnswerGPTInterface
-from text.Summarizer import SummarizerInterface
+from text.GPT.QuestionAnswerGPT import QuestionAnswerGPTInterface
+from text.GPT.Summarizer import SummarizerInterface
 from text.VectorStore import VectorStoreInterface
 
 logger = logging.getLogger(__name__)

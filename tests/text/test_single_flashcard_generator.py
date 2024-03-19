@@ -1,7 +1,7 @@
 from unittest.mock import Mock, patch
 
 from models.ModelConfig import SingleFlashcardGeneratorConfig
-from text.SingleFlashcardGenerator import SingleFlashcardGenerator
+from text.GPT.SingleFlashcardGenerator import SingleFlashcardGenerator
 
 
 def test_single_flashcard_generator():

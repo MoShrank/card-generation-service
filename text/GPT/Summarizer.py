@@ -10,7 +10,7 @@ from external.gpt import (
     get_no_tokens,
 )
 from models.ModelConfig import Message, Messages, SummarizerConfig
-from text.GPTInterface import GPTInterface
+from text.GPT.GPTInterface import GPTInterface
 
 
 class SummarizerInterface(ABC):
@@ -99,6 +99,10 @@ class Summarizer(SummarizerInterface, GPTInterface):
             List[str]: A list of chunks where each chunk is a string containing sentences.
 
         """
+
+        text_size = get_no_tokens(text, self._model_config.parameters.model)
+        if text_size < target_size:
+            return [text]
 
         # Split the text into sentences
         sentences = sent_tokenize(text)

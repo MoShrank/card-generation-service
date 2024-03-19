@@ -14,7 +14,7 @@ from dependencies import (
     get_single_card_generation,
     get_user_repo,
 )
-from external.CardGeneration import CardGenerationInterface
+from text.GPT.CardGeneration import CardGenerationInterface
 from external.DeckServiceAPI import DeckServiceAPIInterface
 from models.HttpModels import HTTPException
 from models.Note import (
@@ -38,7 +38,7 @@ from models.Note import (
 from models.PyObjectID import PyObjectID
 from models.User import User
 from text.CardSourceGenerator import CardSourceGenerator
-from text.GPTInterface import GPTInterface
+from text.GPT.GPTInterface import GPTInterface
 from util.limitier import limiter
 
 logger = logging.getLogger("logger")

@@ -4,9 +4,9 @@ from models.ModelConfig import (
     GPTCard,
     Message,
     Messages,
-    SingleFlashcardGeneratorConfig,
+    ModelConfig,
 )
-from text.GPTInterface import GPTInterface
+from text.GPT.GPTInterface import GPTInterface
 
 
 class SingleFlashcardGeneratorMock(GPTInterface):
@@ -21,11 +21,11 @@ class SingleFlashcardGeneratorMock(GPTInterface):
 
 
 class SingleFlashcardGenerator(GPTInterface):
-    _model_config: SingleFlashcardGeneratorConfig
+    _model_config: ModelConfig
 
     def __init__(
         self,
-        model_config: SingleFlashcardGeneratorConfig,
+        model_config: ModelConfig,
         openai_api_key: str,
     ) -> None:
         openai.api_key = openai_api_key
