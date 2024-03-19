@@ -21,11 +21,13 @@ class EnvConfig(BaseSettings):
     CHROMA_HOST: str = Field("localhost", env="CHROMA_HOST")
     CHROMA_PORT: str = Field("8000", env="CHROMA_PORT")
 
-    QAGPT_CONFIG_ID: str = Field(None, env="QAGPT_CONFIG_ID")
-    MODEL_CONFIG_ID: str = Field(None, env="MODEL_CONFIG_ID")
-    SUMMARIZER_CONFIG_ID: str = Field(None, env="SUMMARIZER_CONFIG_ID")
-    SINGLE_FLASHCARD_GENERATOR_CONFIG_ID: str = Field(
-        None, env="SINGLE_FLASHCARD_GENERATOR_CONFIG_ID"
+    QA_CFG_NAME: str = Field("qa", env="QA_CFG_NAME")
+    CARD_GENERATION_CFG_NAME: str = Field(
+        "card_generation", env="CARD_GENERATION_CFG_NAME"
+    )
+    SUMMARIZER_CFG_NAME: str = Field("summarization", env="SUMMARIZER_CFG_NAME")
+    SINGLE_CARD_GENERATION_CFG_NAME: str = Field(
+        "single_card_generation", env="SINGLE_CARD_GENERATION_CFG_NAME"
     )
 
     AWS_SECRET_KEY: str = Field(None, env="AWS_SECRET_KEY")
@@ -34,14 +36,6 @@ class EnvConfig(BaseSettings):
     @validator("LOG_LEVEL", pre=True)
     def transform_log_level(cls, log_level):
         return log_level.upper()
-
-    @property
-    def GPT_CONFIGS(self) -> list[str]:
-        return [
-            getattr(self, field_name)
-            for field_name in self.__fields__
-            if field_name.endswith("_CONFIG_ID")
-        ]
 
     def is_dev(self):
         return self.ENV == "development"

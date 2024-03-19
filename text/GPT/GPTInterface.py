@@ -19,10 +19,6 @@ class GPTInterface(ABC):
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         pass
 
-    @abstractmethod
-    def _generate_messages(self, *args, **kwargs) -> Messages:
-        pass
-
     @retry_on_exception(Exception, max_retries=3, sleep_time=5)
     def _get_completion(
         self,

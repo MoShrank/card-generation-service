@@ -2,7 +2,6 @@ from typing import Any, Callable, List, Literal, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from models.Note import GPTCard
 from models.PyObjectID import PyObjectID
 
 
@@ -19,11 +18,6 @@ def create_contains_placeholders_validator(
         return v
 
     return _validator
-
-
-class Example(BaseModel):
-    note: str
-    cards: List[GPTCard]
 
 
 class ModelParameters(BaseModel):

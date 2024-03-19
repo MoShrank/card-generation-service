@@ -8,27 +8,25 @@ from slowapi.errors import RateLimitExceeded
 
 import dependencies
 from config import env_config
-from text.GPT.CardGeneration import CardGeneration, CardGenerationMock
 from models.HttpModels import HTTPException
 from models.ModelConfig import (
-    CardGenerationConfig,
+    ModelConfig,
     QuestionAnswerGPTConfig,
-    SingleFlashcardGeneratorConfig,
     SummarizerConfig,
 )
-from models.PyObjectID import PyObjectID
 from routes.notes import router as notes_router
 from routes.pdf import router as pdf_router
 from routes.search import router as search_router
 from routes.web_content import router as web_content_router
 from text.chroma_client import import_data, wait_for_chroma_connection
+from text.GPT.CardGeneration import CardGeneration, CardGenerationMock
 from text.GPT.QuestionAnswerGPT import QuestionAnswerGPT
-from text.SciPDFToMD import SciPDFToMD, SciPDFToMDMock
 from text.GPT.SingleFlashcardGenerator import (
     SingleFlashcardGenerator,
     SingleFlashcardGeneratorMock,
 )
 from text.GPT.Summarizer import Summarizer, SummarizerMock
+from text.SciPDFToMD import SciPDFToMD, SciPDFToMDMock
 from util.limitier import limiter
 
 uvicorn_logger = logging.getLogger("uvicorn")
@@ -38,13 +36,12 @@ logging.basicConfig(level=env_config.LOG_LEVEL, format=logging_format)
 logger = logging.getLogger(__name__)
 
 
-async def get_config(id: str):
-    object_id = PyObjectID(id)
-    config = await dependencies.get_config_repo().find_one({"_id": object_id})
+async def get_config(config_name: str):
+    config = await dependencies.get_config_repo().find_one({"name": config_name})
 
     if not config:
-        logger.error(f"Could not find model config with id: {id}")
-        raise Exception(f"Could not find model config with id: {id}")
+        logger.error(f"Could not find model config for: {config_name}")
+        raise Exception(f"Could not find model config for: {config_name}")
 
     return config
 
@@ -53,14 +50,14 @@ async def setup_prod_env():
     logger.info("Production environment detected")
 
     logger.info("Loading Card Generation model...")
-    model_config = await get_config(env_config.MODEL_CONFIG_ID)
-    model_config = CardGenerationConfig(**model_config)
+    model_config = await get_config(env_config.CARD_GENERATION_CFG_NAME)
+    model_config = ModelConfig(**model_config)
     dependencies.card_generation = CardGeneration(
         model_config, env_config.OPENAI_API_KEY
     )
 
     logger.info("Loading Summarizer model...")
-    summarizer_model_config = await get_config(env_config.SUMMARIZER_CONFIG_ID)
+    summarizer_model_config = await get_config(env_config.SUMMARIZER_CFG_NAME)
     summarizer_model_config = SummarizerConfig(**summarizer_model_config)
     dependencies.summarizer = Summarizer(
         summarizer_model_config, env_config.OPENAI_API_KEY
@@ -68,11 +65,9 @@ async def setup_prod_env():
 
     logger.info("Loading Single Flashcard Generator Model")
     single_flashcard_model_config = await get_config(
-        env_config.SINGLE_FLASHCARD_GENERATOR_CONFIG_ID
+        env_config.SINGLE_CARD_GENERATION_CFG_NAME
     )
-    single_flashcard_model_config = SingleFlashcardGeneratorConfig(
-        **single_flashcard_model_config
-    )
+    single_flashcard_model_config = ModelConfig(**single_flashcard_model_config)
     dependencies.single_flashcard_generation = SingleFlashcardGenerator(
         single_flashcard_model_config, env_config.OPENAI_API_KEY
     )
@@ -109,7 +104,7 @@ async def lifespan(
     await env_setups[env_config.ENV]()
 
     logger.info("Loading Question Answer GPT model...")
-    qagpt_model_config = await get_config(env_config.QAGPT_CONFIG_ID)
+    qagpt_model_config = await get_config(env_config.QA_CFG_NAME)
     qagpt_model_config = QuestionAnswerGPTConfig(**qagpt_model_config)
     dependencies.question_answer_gpt = QuestionAnswerGPT(
         qagpt_model_config, env_config.OPENAI_API_KEY

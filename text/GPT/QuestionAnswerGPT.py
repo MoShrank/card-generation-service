@@ -1,22 +1,9 @@
-from abc import ABC, abstractmethod
-
-import openai
-
 from external.gpt import get_chatgpt_completion
-from models.ModelConfig import Message, QuestionAnswerGPTConfig
+from models.ModelConfig import Message
+from text.GPT.GPTInterface import GPTInterface
 
 
-class QuestionAnswerGPTInterface(ABC):
-    @abstractmethod
-    def __call__(self, documents: list[str], question: str, user_id: str) -> str:
-        pass
-
-
-class QuestionAnswerGPT(QuestionAnswerGPTInterface):
-    def __init__(self, model_config: QuestionAnswerGPTConfig, openai_api_key: str):
-        openai.api_key = openai_api_key
-        self._model_config = model_config
-
+class QuestionAnswerGPT(GPTInterface):
     def __call__(self, documents: list[str], question: str, user_id: str) -> str:
         text = "\n\n".join(documents)
 
