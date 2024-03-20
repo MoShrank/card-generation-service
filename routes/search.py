@@ -8,7 +8,7 @@ from models.SearchResults import (
     QuestionResponseData,
     SearchResult,
 )
-from text.GPT.QuestionAnswerGPT import QuestionAnswerGPTInterface
+from text.GPT.GPTInterface import GPTInterface
 from text.VectorStore import SourceTypes, VectorStoreInterface
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ def build_gpt_context(documents: list[str]) -> str:
 async def search(
     userID: str,
     query: str,
-    qa_gpt: QuestionAnswerGPTInterface = Depends(get_question_answer_gpt),
+    qa_gpt: GPTInterface = Depends(get_question_answer_gpt),
     vector_store: VectorStoreInterface = Depends(get_vector_store),
 ):
     results = vector_store.query(

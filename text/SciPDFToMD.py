@@ -5,7 +5,7 @@ from uuid import uuid4
 
 import fitz  # type: ignore
 import modal
-import pypandoc
+import pypandoc  # type: ignore
 from modal.functions import FunctionCall
 
 

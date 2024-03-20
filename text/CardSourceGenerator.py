@@ -1,10 +1,9 @@
-import os
 import re
 from typing import Tuple
 
 from transformers import pipeline  # type: ignore
 
-MODEL_PATH = os.environ.get("MODEL_PATH", "./distilbert-base-cased-distilled-squad")
+from config import env_config
 
 
 class CardSourceGeneratorMock:
@@ -15,7 +14,9 @@ class CardSourceGeneratorMock:
 class CardSourceGenerator:
     def __init__(self) -> None:
         self._qa_model = pipeline(
-            "question-answering", model=MODEL_PATH, tokenizer=MODEL_PATH
+            "question-answering",
+            model=env_config.BERT_MODEL_PATH,
+            tokenizer=env_config.BERT_MODEL_PATH,
         )
 
     def __call__(self, text: str, question: str) -> Tuple[int, int]:

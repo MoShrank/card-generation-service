@@ -61,8 +61,8 @@ class CardGeneration(GPTInterface):
         for qa in qas:
             split_qa = qa.split("\n")
             if len(split_qa) == 2:
-                question = split_qa[0].strip().replace("Q: ", "")
-                answer = split_qa[1].strip().replace("A: ", "")
+                question = split_qa[0].strip().replace("Front: ", "")
+                answer = split_qa[1].strip().replace("Back: ", "")
                 card = GPTCard(question=question, answer=answer)
                 parsed_qas.append(card)
 

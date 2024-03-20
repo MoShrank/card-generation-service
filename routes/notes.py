@@ -14,7 +14,6 @@ from dependencies import (
     get_single_card_generation,
     get_user_repo,
 )
-from text.GPT.CardGeneration import CardGenerationInterface
 from external.DeckServiceAPI import DeckServiceAPIInterface
 from models.HttpModels import HTTPException
 from models.Note import (
@@ -88,7 +87,7 @@ async def generate_cards(
     userID: str,
     user_repo: DBInterface = Depends(get_user_repo),
     note_repo: DBInterface = Depends(get_note_repo),
-    generate_cards: CardGenerationInterface = Depends(get_card_generation),
+    generate_cards: GPTInterface = Depends(get_card_generation),
     card_source_generator: CardSourceGenerator = Depends(get_card_source_generator),
 ):
     open_ai_user_id = await get_or_create_openai_user(user_repo, userID)

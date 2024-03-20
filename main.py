@@ -12,7 +12,6 @@ from models.HttpModels import HTTPException
 from models.ModelConfig import (
     ModelConfig,
     QuestionAnswerGPTConfig,
-    SummarizerConfig,
 )
 from routes.notes import router as notes_router
 from routes.pdf import router as pdf_router
@@ -58,7 +57,7 @@ async def setup_prod_env():
 
     logger.info("Loading Summarizer model...")
     summarizer_model_config = await get_config(env_config.SUMMARIZER_CFG_NAME)
-    summarizer_model_config = SummarizerConfig(**summarizer_model_config)
+    summarizer_model_config = ModelConfig(**summarizer_model_config)
     dependencies.summarizer = Summarizer(
         summarizer_model_config, env_config.OPENAI_API_KEY
     )

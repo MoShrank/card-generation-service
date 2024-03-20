@@ -9,12 +9,10 @@ from external.DeckServiceAPI import DeckServiceAPI
 from models.ModelConfig import (
     ModelConfig,
     QuestionAnswerGPTConfig,
-    SummarizerConfig,
 )
 from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
 from text.chroma_client import chroma_client
 from text.GPT.GPTInterface import GPTInterface
-from text.GPT.QuestionAnswerGPT import QuestionAnswerGPTInterface
 from text.GPT.Summarizer import SummarizerInterface
 from text.PDFStorage import PDFStorage
 from text.SciPDFToMD import SciPDFToMDInterface
@@ -42,11 +40,11 @@ card_generation: Optional[GPTInterface] = None
 single_flashcard_model_config: Optional[ModelConfig] = None
 single_flashcard_generation: Optional[GPTInterface] = None
 
-summarizer_model_config: Optional[SummarizerConfig] = None
+summarizer_model_config: Optional[ModelConfig] = None
 summarizer: Optional[SummarizerInterface] = None
 
 question_answer_gpt_config: Optional[QuestionAnswerGPTConfig] = None
-question_answer_gpt: Optional[QuestionAnswerGPTInterface] = None
+question_answer_gpt: Optional[GPTInterface] = None
 
 text_splitter = TextSplitter(1000, 70)
 vector_store = VectorStore(text_splitter, chroma_client, 3)

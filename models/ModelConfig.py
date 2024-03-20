@@ -20,6 +20,11 @@ def create_contains_placeholders_validator(
     return _validator
 
 
+class GPTCard(BaseModel):
+    question: str
+    answer: str
+
+
 class ModelParameters(BaseModel):
     temperature: int
     model: str
@@ -44,10 +49,6 @@ class ModelConfig(BaseModel):
     parameters: ModelParameters
     max_model_tokens: int
     system_message: str
-
-
-class SummarizerConfig(ModelConfig):
-    user_message_prefix: str
 
 
 class QuestionAnswerGPTConfig(ModelConfig):

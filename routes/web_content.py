@@ -23,7 +23,7 @@ from models.WebContent import (
     WebContentResponseData,
 )
 from text.content.ContentExtractor import ContentExtractor
-from text.GPT.QuestionAnswerGPT import QuestionAnswerGPTInterface
+from text.GPT.GPTInterface import GPTInterface
 from text.GPT.Summarizer import SummarizerInterface
 from text.VectorStore import VectorStoreInterface
 
@@ -164,7 +164,7 @@ async def get_answer(
     question: str,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
     vector_store: VectorStoreInterface = Depends(get_vector_store),
-    qa_gpt: QuestionAnswerGPTInterface = Depends(get_question_answer_gpt),
+    qa_gpt: GPTInterface = Depends(get_question_answer_gpt),
 ) -> WebContentQAResponse:
     web_content = await web_content_repo.find_one(
         {"_id": PyObjectID(postID), "user_id": userID}
@@ -182,7 +182,7 @@ async def get_answer(
         {
             "user_id": userID,
             "source_id": postID,
-            "source_types": "web",
+            "source_type": "web",
         },
     )["documents"]
 
@@ -219,7 +219,7 @@ async def search_posts(
         query,
         {
             "user_id": userID,
-            "source_types": "web",
+            "source_type": "web",
         },
     )["metadatas"]
 

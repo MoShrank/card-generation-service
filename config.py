@@ -21,6 +21,10 @@ class EnvConfig(BaseSettings):
     CHROMA_HOST: str = Field("localhost", env="CHROMA_HOST")
     CHROMA_PORT: str = Field("8000", env="CHROMA_PORT")
 
+    BERT_MODEL_PATH: str = Field(
+        "distilbert/distilbert-base-cased-distilled-squad", env="BERT_MODEL_PATH"
+    )
+
     QA_CFG_NAME: str = Field("qa", env="QA_CFG_NAME")
     CARD_GENERATION_CFG_NAME: str = Field(
         "card_generation", env="CARD_GENERATION_CFG_NAME"

@@ -9,7 +9,7 @@ from external.gpt import (
     calculate_chat_gpt_token_size,
     get_no_tokens,
 )
-from models.ModelConfig import Message, Messages, SummarizerConfig
+from models.ModelConfig import Message, Messages, ModelConfig
 from text.GPT.GPTInterface import GPTInterface
 
 
@@ -25,9 +25,9 @@ class SummarizerMock(SummarizerInterface):
 
 
 class Summarizer(SummarizerInterface, GPTInterface):
-    _model_config: SummarizerConfig
+    _model_config: ModelConfig
 
-    def __init__(self, config: SummarizerConfig, openai_api_key: str) -> None:
+    def __init__(self, config: ModelConfig, openai_api_key: str) -> None:
         self._model_config = config
 
         openai.api_key = openai_api_key
@@ -79,9 +79,7 @@ class Summarizer(SummarizerInterface, GPTInterface):
         system_message = Message(
             role="system", content=self._model_config.system_message
         )
-        user_message = Message(
-            role="user", content=self._model_config.user_message_prefix + text
-        )
+        user_message = Message(role="user", content=text)
 
         messages = [system_message, user_message]
 
