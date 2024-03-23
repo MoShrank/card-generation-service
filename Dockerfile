@@ -2,7 +2,7 @@ FROM python:3.11.4-slim-bookworm
 
 LABEL maintainer="Moritz Eich <hey@moritz.dev>"
 
-ENV PORT=80
+ENV PORT=${PORT}
 
 RUN apt-get update -y
 RUN apt-get update; apt-get install curl -y
@@ -21,6 +21,6 @@ RUN poetry config virtualenvs.create false && poetry install --only main
 
 RUN python -m nltk.downloader punkt
 
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT} --log-level ${LOG_LEVEL}
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT} --log-level ${LOG_LEVEL} --workers 1
 
 HEALTHCHECK CMD curl --fail http://localhost:${PORT}/ping || exit 1

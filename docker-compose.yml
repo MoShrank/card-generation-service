@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   card-generation-service:
-    build: ./
+    build: .
     container_name: card-generation-service
     env_file:
       - .env
@@ -10,6 +10,8 @@ services:
       MODEL_PATH: "/Users/moritzeich/dev/spacey/card-generation-service/distilbert-base-cased-distilled-squad"
     volumes:
       - /Users/moritzeich/dev/spacey/card-generation-service/distilbert-base-cased-distilled-squad:/Users/moritzeich/dev/spacey/card-generation-service/distilbert-base-cased-distilled-squad
+      - .:/app
+    command: uvicorn main:app --host 0.0.0.0 --port ${PORT} --log-level ${LOG_LEVEL} --workers 1 --reload
     networks:
       - spacey-services
 
