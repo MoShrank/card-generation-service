@@ -8,7 +8,7 @@ title_tags = ["h1", "h2", "h3"]
 
 
 def extract_title(html: str) -> Optional[str]:
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, parser="lxml")
 
     title = None
 
@@ -30,7 +30,7 @@ def extract_info(content: str) -> dict:
     info["title"] = doc.title()
 
     content = doc.content()
-    soup = BeautifulSoup(content)
+    soup = BeautifulSoup(content, parser="lxml")
 
     cleaned_text = soup.get_text()
     for word in remove_words:
