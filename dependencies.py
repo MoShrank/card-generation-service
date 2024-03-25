@@ -12,6 +12,7 @@ from models.ModelConfig import (
 )
 from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
 from text.chroma_client import chroma_client
+from text.content.ContentExtractor import ContentExtractor
 from text.GPT.GPTInterface import GPTInterface
 from text.GPT.Summarizer import SummarizerInterface
 from text.PDFStorage import PDFStorage
@@ -127,3 +128,10 @@ def get_pdf_to_md():
 
 def get_pdf_storage():
     return pdf_storage
+
+
+content_extractor = ContentExtractor()
+
+
+def get_content_extractor():
+    return content_extractor

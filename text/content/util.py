@@ -32,8 +32,8 @@ def get_pdf_from_scihub(src: str) -> bytes:
 
 
 def get_info_from_pdf(pdf: bytes) -> Content:
-    pdf_reader = PyPDF2.PdfFileReader(io.BytesIO(pdf))
-    info = pdf_reader.getDocumentInfo()
+    pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf))
+    info = pdf_reader.metadata
 
     title = ""
 
@@ -43,7 +43,7 @@ def get_info_from_pdf(pdf: bytes) -> Content:
     text = ""
 
     for page in pdf_reader.pages:
-        text += page.extractText()
+        text += page.extract_text()
 
     return Content(title=title, content=text, raw_content=text)
 

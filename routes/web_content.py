@@ -6,6 +6,7 @@ from pydantic import parse_obj_as
 
 from database.db_interface import DBInterface
 from dependencies import (
+    get_content_extractor,
     get_question_answer_gpt,
     get_summarizer,
     get_vector_store,
@@ -66,17 +67,16 @@ async def create_post(
     web_content_repo: DBInterface = Depends(get_web_content_repo),
     summarizer: SummarizerInterface = Depends(get_summarizer),
     vector_store: VectorStoreInterface = Depends(get_vector_store),
+    content_extractor: ContentExtractor = Depends(get_content_extractor),
 ) -> WebContentCreatedResponse:
     src = body.url
-
-    content_extractor = ContentExtractor()
 
     try:
         content = content_extractor(src)
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            message="Failed to get Content. If you want to get a webpage, make sure that you add http at the beginning.",
+            message="Failed to retrieve content. If you want to get a webpage, make sure that you add http at the beginning.",
             error=str(e),
         )
 
