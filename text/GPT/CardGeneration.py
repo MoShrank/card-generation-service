@@ -8,6 +8,9 @@ from text.GPT.GPTInterface import GPTInterface
 
 
 class CardGenerationMock(GPTInterface):
+    def __init__(self) -> None:
+        pass
+
     def __call__(self, text: str, user_id: str) -> List[GPTCard]:
         return [
             GPTCard(

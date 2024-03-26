@@ -28,5 +28,7 @@ class DBInterface(ABC):
         pass
 
     @abstractmethod
-    async def find_by_id(self, id: str | PyObjectID, query: Optional[dict]) -> Dict:
+    async def find_by_id(
+        self, id: str | PyObjectID, query: Optional[dict]
+    ) -> Optional[Dict]:
         pass

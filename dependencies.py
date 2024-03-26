@@ -1,10 +1,12 @@
 from enum import Enum
-from typing import Optional
+from typing import Annotated, Optional
 
 from fastapi import Depends
 
 from config import env_config
-from database.db import DBConnection, DBOperations
+from database import db_conn
+from database.connection import DBConnection
+from database.operations import DBOperations
 from external.DeckServiceAPI import DeckServiceAPI
 from models.ModelConfig import (
     ModelConfig,
@@ -59,15 +61,12 @@ card_source_generator = (
     CardSourceGenerator() if env_config.is_prod() else CardSourceGeneratorMock()
 )
 
-db_conn = DBConnection(env_config.DATABASE)
-
 
 def get_db_connection():
     return db_conn
 
 
-def get_config_repo():
-    db_connection = get_db_connection()
+def get_config_repo(db_connection: Annotated[DBConnection, Depends()]):
     return DBOperations(OPENAI_CONFIG_COLLECTION, db_connection)
 
 

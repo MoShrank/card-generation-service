@@ -10,6 +10,9 @@ from text.GPT.GPTInterface import GPTInterface
 
 
 class SingleFlashcardGeneratorMock(GPTInterface):
+    def __init__(self) -> None:
+        pass
+
     def __call__(self, text: str, user_id: str) -> GPTCard:
         return GPTCard(
             question="What is the capital of the United States?",

@@ -7,7 +7,12 @@ from fastapi.testclient import TestClient
 from dependencies import get_vector_store, get_web_content_repo
 from main import app
 from models.WebContent import WebContentRequest
-from text.VectorStore import Include, Metadata, VectorStoreInterface
+from text.VectorStore import (
+    MetaData,
+    QueryFilters,
+    QueryResult,
+    VectorStoreInterface,
+)
 
 client = TestClient(app)
 
@@ -84,26 +89,29 @@ def test_get_posts(test_user_id, test_web_content_request):
 
 class VectorStoreMock(VectorStoreInterface):
     def __init__(self):
-        self.documents = [{}]
-        self.metadatas = [{}]
+        self.documents = []
+        self.metadatas = []
+        self.ids = []
+        self.distances = []
 
-    def add_document(self, document: str, metadata: Optional[Metadata] = None):
+    def add_document(self, document: str, metadata: Optional[MetaData] = None):
         self.documents.append(document)
         self.metadatas.append(metadata)
 
-    def add_documents(self, documents: list[str], metadatas: list[Metadata]):
+    def add_documents(self, documents: list[str], metadatas: list[MetaData]):
         self.documents.extend(documents)
         self.metadatas.extend(metadatas)
 
     def query(
         self,
         query: str,
-        filter_values: dict[str, str],
-        include: Include = ["documents"],
-    ) -> dict:
+        filter_values: QueryFilters,
+    ) -> QueryResult:
         return {
+            "ids": self.ids,
             "documents": self.documents,
             "metadatas": self.metadatas,
+            "distances": self.distances,
         }
 
 
