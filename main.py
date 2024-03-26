@@ -36,7 +36,8 @@ logger = logging.getLogger(__name__)
 
 
 async def get_config(config_name: str):
-    config = await dependencies.get_config_repo().find_one({"name": config_name})
+    db_conn = dependencies.get_db_connection()
+    config = await dependencies.get_config_repo(db_conn).find_one({"name": config_name})
 
     if not config:
         logger.error(f"Could not find model config for: {config_name}")
