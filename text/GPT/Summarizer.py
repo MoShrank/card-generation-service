@@ -1,10 +1,10 @@
 import re
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
-import openai
 from nltk.tokenize import sent_tokenize  # type: ignore
 
+from config import env_config
 from external.gpt import (
     calculate_chat_gpt_token_size,
     get_no_tokens,
@@ -25,13 +25,6 @@ class SummarizerMock(SummarizerInterface):
 
 
 class Summarizer(SummarizerInterface, GPTInterface):
-    _model_config: ModelConfig
-
-    def __init__(self, config: ModelConfig, openai_api_key: str) -> None:
-        self._model_config = config
-
-        openai.api_key = openai_api_key
-
     def __call__(self, text: str, user_id: str) -> str:
         target_size = self._get_target_size()
 
@@ -137,3 +130,19 @@ class Summarizer(SummarizerInterface, GPTInterface):
             chunks.append(chunk)
 
         return chunks
+
+
+summarizer: SummarizerInterface
+
+
+def init(model_config: Optional[ModelConfig] = None) -> None:
+    global summarizer
+
+    if env_config.is_prod() and model_config:
+        summarizer = Summarizer(model_config, env_config.OPENAI_API_KEY)
+    else:
+        summarizer = SummarizerMock()
+
+
+def get_summarizer() -> SummarizerInterface:
+    return summarizer

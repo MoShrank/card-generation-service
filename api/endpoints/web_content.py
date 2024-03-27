@@ -7,8 +7,6 @@ from pydantic import parse_obj_as
 from database.db_interface import DBInterface
 from dependencies import (
     get_content_extractor,
-    get_question_answer_gpt,
-    get_summarizer,
     get_vector_store,
     get_web_content_repo,
 )
@@ -25,7 +23,8 @@ from models.WebContent import (
 )
 from text.content.ContentExtractor import ContentExtractor
 from text.GPT.GPTInterface import GPTInterface
-from text.GPT.Summarizer import SummarizerInterface
+from text.GPT.QuestionAnswerGPT import get_qa_model
+from text.GPT.Summarizer import SummarizerInterface, get_summarizer
 from text.VectorStore import VectorStoreInterface
 
 logger = logging.getLogger(__name__)
@@ -164,7 +163,7 @@ async def get_answer(
     question: str,
     web_content_repo: DBInterface = Depends(get_web_content_repo),
     vector_store: VectorStoreInterface = Depends(get_vector_store),
-    qa_gpt: GPTInterface = Depends(get_question_answer_gpt),
+    qa_gpt: GPTInterface = Depends(get_qa_model),
 ) -> WebContentQAResponse:
     web_content = await web_content_repo.find_one(
         {"_id": PyObjectID(postID), "user_id": userID}

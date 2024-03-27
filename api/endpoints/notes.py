@@ -7,11 +7,9 @@ from fastapi import APIRouter, Depends, Request
 from config import env_config
 from database.db_interface import DBInterface
 from dependencies import (
-    get_card_generation,
     get_card_source_generator,
     get_deck_service,
     get_note_repo,
-    get_single_card_generation,
     get_user_repo,
 )
 from external.DeckServiceAPI import DeckServiceAPIInterface
@@ -37,7 +35,9 @@ from models.Note import (
 from models.PyObjectID import PyObjectID
 from models.User import User
 from text.CardSourceGenerator import CardSourceGenerator
+from text.GPT import get_card_generation
 from text.GPT.GPTInterface import GPTInterface
+from text.GPT.SingleFlashcardGenerator import get_single_card_generator
 from util.limitier import limiter
 
 logger = logging.getLogger("logger")
@@ -227,7 +227,7 @@ async def generate_card(
     userID: str,
     user_repo: DBInterface = Depends(get_user_repo),
     note_repo: DBInterface = Depends(get_note_repo),
-    generate_card: GPTInterface = Depends(get_single_card_generation),
+    generate_card: GPTInterface = Depends(get_single_card_generator),
 ):
     openai_user_id = await get_or_create_openai_user(user_repo, userID)
 

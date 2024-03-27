@@ -2,13 +2,14 @@ import logging
 
 from fastapi import APIRouter, Depends
 
-from dependencies import get_question_answer_gpt, get_vector_store
+from dependencies import get_vector_store
 from models.SearchResults import (
     QuestionResponse,
     QuestionResponseData,
     SearchResult,
 )
 from text.GPT.GPTInterface import GPTInterface
+from text.GPT.QuestionAnswerGPT import get_qa_model
 from text.VectorStore import SourceTypes, VectorStoreInterface
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ def build_gpt_context(documents: list[str]) -> str:
 async def search(
     userID: str,
     query: str,
-    qa_gpt: GPTInterface = Depends(get_question_answer_gpt),
+    qa_gpt: GPTInterface = Depends(get_qa_model),
     vector_store: VectorStoreInterface = Depends(get_vector_store),
 ):
     results = vector_store.query(

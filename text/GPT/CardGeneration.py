@@ -1,7 +1,6 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
-import openai
-
+from config import env_config
 from models.ModelConfig import Message, Messages, ModelConfig
 from models.Note import GPTCard
 from text.GPT.GPTInterface import GPTInterface
@@ -11,7 +10,7 @@ class CardGenerationMock(GPTInterface):
     def __init__(self) -> None:
         pass
 
-    def __call__(self, text: str, user_id: str) -> List[GPTCard]:
+    def __call__(self) -> List[GPTCard]:
         return [
             GPTCard(
                 question="What is the capital of the United States?",
@@ -29,12 +28,6 @@ class CardGenerationMock(GPTInterface):
 
 
 class CardGeneration(GPTInterface):
-    _model_config: ModelConfig
-
-    def __init__(self, model_config: ModelConfig, openai_api_key: str) -> None:
-        openai.api_key = openai_api_key
-        self._model_config = model_config
-
     def __call__(self, text: str, user_id: str) -> List[GPTCard]:
         preprocessed_text = self.preprocess(text)
 
@@ -70,3 +63,19 @@ class CardGeneration(GPTInterface):
                 parsed_qas.append(card)
 
         return parsed_qas
+
+
+card_generation: GPTInterface
+
+
+def init(model_config: Optional[ModelConfig] = None) -> None:
+    global card_generation
+
+    if env_config.is_prod() and model_config:
+        card_generation = CardGeneration(model_config, env_config.OPENAI_API_KEY)
+    else:
+        card_generation = CardGenerationMock()
+
+
+def get_card_generation() -> GPTInterface:
+    return card_generation

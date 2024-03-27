@@ -6,7 +6,6 @@ from config import env_config
 
 logger = logging.getLogger(__name__)
 
-
 class DBConnection:
     MAX_CONNECTION_TIME = 5000
 
@@ -38,3 +37,7 @@ class DBConnection:
 
 
 db_conn = DBConnection(env_config.DATABASE)
+
+
+def get_db_connection():
+    return db_conn

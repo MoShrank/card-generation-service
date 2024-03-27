@@ -1,5 +1,6 @@
+from config import env_config
 from external.gpt import get_chatgpt_completion
-from models.ModelConfig import Message
+from models.ModelConfig import Message, ModelConfig
 from text.GPT.GPTInterface import GPTInterface
 
 
@@ -19,3 +20,15 @@ class QuestionAnswerGPT(GPTInterface):
         )
 
         return completion
+
+
+qa_model: GPTInterface
+
+
+def init(model_config: ModelConfig) -> None:
+    global qa_model
+    qa_model = QuestionAnswerGPT(model_config, env_config.OPENAI_API_KEY)
+
+
+def get_qa_model() -> GPTInterface:
+    return qa_model

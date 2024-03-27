@@ -1,5 +1,6 @@
-import openai
+from typing import Optional
 
+from config import env_config
 from models.ModelConfig import (
     GPTCard,
     Message,
@@ -24,15 +25,6 @@ class SingleFlashcardGeneratorMock(GPTInterface):
 
 
 class SingleFlashcardGenerator(GPTInterface):
-    _model_config: ModelConfig
-
-    def __init__(
-        self,
-        model_config: ModelConfig,
-        openai_api_key: str,
-    ) -> None:
-        openai.api_key = openai_api_key
-        self._model_config = model_config
 
     def __call__(self, text: str, user_id: str) -> GPTCard:
         messages = self._generate_messages(text)
@@ -59,3 +51,22 @@ class SingleFlashcardGenerator(GPTInterface):
         ]
 
         return messages
+
+
+single_card_generator: GPTInterface
+
+
+def init(model_config: Optional[ModelConfig] = None) -> None:
+    global single_card_generator
+
+    if env_config.is_prod() and model_config:
+        single_card_generator = SingleFlashcardGenerator(
+            model_config=model_config,
+            openai_api_key=env_config.OPENAI_API_KEY,
+        )
+    else:
+        single_card_generator = SingleFlashcardGeneratorMock()
+
+
+def get_single_card_generator() -> GPTInterface:
+    return single_card_generator
