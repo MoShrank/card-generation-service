@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 from config import env_config
 from models.HttpModels import BaseResponse
 from models.MongoModel import MongoModel
-from models.PyObjectID import PyObjectID
 
 
 class GPTCard(BaseModel):
@@ -21,7 +20,6 @@ class Card(GPTCard):
 
 
 class Note(MongoModel):
-    id: PyObjectID = Field(default_factory=PyObjectID, alias="_id")
     user_id: str
     deck_id: str
     text: str
@@ -29,7 +27,6 @@ class Note(MongoModel):
     cards_edited: bool
     cards: List[Card]
     cards_edited_at: Optional[datetime]
-    created_at: str
 
 
 # HTTP Handler models

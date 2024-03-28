@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Dict, List
+from typing import Annotated, Dict, List
 
 from fastapi import APIRouter, Depends, Request
 
@@ -34,10 +34,10 @@ from models.Note import (
 )
 from models.PyObjectID import PyObjectID
 from models.User import User
+from repository import NoteRepository
 from text.CardSourceGenerator import CardSourceGenerator
-from text.GPT import get_card_generation
+from text.GPT import get_card_generation, get_single_card_generator
 from text.GPT.GPTInterface import GPTInterface
-from text.GPT.SingleFlashcardGenerator import get_single_card_generator
 from util.limitier import limiter
 
 logger = logging.getLogger("logger")
@@ -85,8 +85,8 @@ async def generate_cards(
     request: Request,
     body: GenerateCardsRequest,
     userID: str,
+    note_repo: Annotated[NoteRepository, Depends()],
     user_repo: DBInterface = Depends(get_user_repo),
-    note_repo: DBInterface = Depends(get_note_repo),
     generate_cards: GPTInterface = Depends(get_card_generation),
     card_source_generator: CardSourceGenerator = Depends(get_card_source_generator),
 ):
@@ -109,8 +109,6 @@ async def generate_cards(
 
         cards_with_source.append(card)
 
-    now = datetime.now().isoformat()
-
     note = Note(
         user_id=userID,
         deck_id=body.deck_id,
@@ -119,13 +117,9 @@ async def generate_cards(
         cards=cards_with_source,
         cards_edited_at=None,
         cards_edited=False,
-        created_at=now,
     ).dict(by_alias=True)
 
-    insertion_result = await note_repo.insert_one(note)
-    note_id = str(insertion_result.inserted_id)
-
-    note["id"] = note_id
+    note["id"] = await note_repo.insert_one(note)
 
     data = CardsResponseData(**note)
 
@@ -139,18 +133,14 @@ async def add_cards(
     id: str,
     deck_id: str,
     userID: str,
-    note_repo: DBInterface = Depends(get_note_repo),
+    note_repo: Annotated[NoteRepository, Depends()],
     deck_service: DeckServiceAPIInterface = Depends(get_deck_service),
 ):
-    note: Dict = await note_repo.find_one(
-        {"_id": PyObjectID(id), "user_id": userID, "deck_id": deck_id}
-    )
-
+    note = await note_repo.find_by_id(id, {"user_id": userID, "deck_id": deck_id})
     if not note:
         raise HTTPException(
             status_code=404, message="Failed to save cards", error="Note not found"
         )
-
     if note["cards_added"]:
         raise HTTPException(
             status_code=409, message="Failed to save cards", error="Cards Already added"
@@ -183,7 +173,7 @@ async def update_cards(
     id: str,
     body: UpdateCardsRequest,
     userID: str,
-    note_repo: DBInterface = Depends(get_note_repo),
+    note_repo: Annotated[NoteRepository, Depends()],
 ):
     new_cards = body.cards
     now = datetime.now().isoformat()
@@ -207,9 +197,9 @@ async def update_cards(
 @router.get("", response_model=NotesResponse)
 async def get_note(
     userID: str,
-    note_repo: DBInterface = Depends(get_note_repo),
+    note_repo: Annotated[NoteRepository, Depends()],
 ):
-    notes: List[Dict] = await note_repo.query({"user_id": userID, "cards_added": False})
+    notes = await note_repo.query({"user_id": userID, "cards_added": False})
 
     notes_by_deck = map_notes_to_deck(notes)
 
