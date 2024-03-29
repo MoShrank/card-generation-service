@@ -1,7 +1,7 @@
 from enum import Enum
 
-from text.content.Content import Content
-from text.content.util import (
+from lib.content.Content import Content
+from lib.content.util import (
     get_text_from_paper_src,
     get_text_from_webpage,
 )

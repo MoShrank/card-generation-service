@@ -4,7 +4,7 @@ from typing import Any
 import openai
 
 from external.gpt import get_chatgpt_completion
-from models.ModelConfig import Messages, ModelConfig
+from adapters.database_models.ModelConfig import Messages, ModelConfig
 from util.error import retry_on_exception
 
 

@@ -7,22 +7,22 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 import dependencies
-from api import api_router
-from config import env_config
-from database import db_conn
-from models.HttpModels import HTTPException
-from models.ModelConfig import (
+from adapters import db_conn
+from adapters.ChromaConnection import chroma_conn
+from adapters.database_models.ModelConfig import (
     ModelConfig,
     QuestionAnswerGPTConfig,
 )
-from text.chroma_client import import_data, wait_for_chroma_connection
+from adapters.http_models.HttpModels import HTTPException
+from adapters.SciPDFToMD import SciPDFToMD, SciPDFToMDMock
+from api import api_router
+from config import env_config
 from text.GPT import (
     init_card_generation,
     init_qa_model,
     init_single_card_generator,
     init_summarizer,
 )
-from text.SciPDFToMD import SciPDFToMD, SciPDFToMDMock
 from util.limitier import limiter
 
 uvicorn_logger = logging.getLogger("uvicorn")
@@ -86,10 +86,10 @@ async def lifespan(
     await db_conn.wait_for_connection()
 
     logger.info("Connecting to ChromaDB...")
-    await wait_for_chroma_connection(5)
+    await chroma_conn.wait_for_connection()
 
     logger.info("Importing data to ChromaDB...")
-    await import_data()
+    await chroma_conn.import_data("content")
 
     await env_setups[env_config.ENV]()
 
@@ -118,7 +118,7 @@ async def http_exception_handler(exception: HTTPException) -> JSONResponse:
         },
     )
 
-
+ 
 @app.get("/ping")
 async def ping() -> dict:
     return {"ping": "pong!"}

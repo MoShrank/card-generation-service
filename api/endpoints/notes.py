@@ -4,38 +4,40 @@ from typing import Annotated, Dict, List
 
 from fastapi import APIRouter, Depends, Request
 
-from config import env_config
-from database.db_interface import DBInterface
-from dependencies import (
-    get_card_source_generator,
-    get_deck_service,
-    get_note_repo,
-    get_user_repo,
+from adapters.database_models.Note import (
+    Card,
+    GPTCard,
+    Note,
 )
-from external.DeckServiceAPI import DeckServiceAPIInterface
-from models.HttpModels import HTTPException
-from models.Note import (
+from adapters.database_models.PyObjectID import PyObjectID
+from adapters.database_models.User import User
+from adapters.DBInterface import DBInterface
+from adapters.DeckServiceAPI import DeckServiceAPIInterface
+from adapters.http_models.HttpModels import HTTPException
+from adapters.http_models.Note import (
     AddedCardsResponse,
     AddedCardsResponseData,
-    Card,
     CardResponse,
     CardResponseData,
     CardsResponse,
     CardsResponseData,
     GenerateCardRequest,
     GenerateCardsRequest,
-    GPTCard,
-    Note,
     NotesResponse,
     NotesResponseData,
     UpdateCardsRequest,
     UpdatedCardsResponse,
     UpdatedCardsResponseData,
 )
-from models.PyObjectID import PyObjectID
-from models.User import User
+from config import env_config
+from dependencies import (
+    get_card_source_generator,
+    get_deck_service,
+    get_note_repo,
+    get_user_repo,
+)
+from lib.CardSourceGenerator import CardSourceGenerator
 from repository import NoteRepository
-from text.CardSourceGenerator import CardSourceGenerator
 from text.GPT import get_card_generation, get_single_card_generator
 from text.GPT.GPTInterface import GPTInterface
 from util.limitier import limiter

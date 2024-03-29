@@ -1,9 +1,8 @@
-from database.connection import DBConnection
-from database.db_interface import DBInterface
-from models.PyObjectID import PyObjectID
-
-
 from typing import Dict
+
+from adapters.database_models.PyObjectID import PyObjectID
+from adapters.DBConnection import DBConnection
+from adapters.DBInterface import DBInterface
 
 
 class DBOperations(DBInterface):

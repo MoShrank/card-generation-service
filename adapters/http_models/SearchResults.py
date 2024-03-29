@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from models.HttpModels import BaseResponse
-from text.VectorStore import SourceTypes
+from adapters.http_models.HttpModels import BaseResponse
+from adapters.VectorStore import SourceTypes
 
 
 class ChatQuestion(BaseModel):

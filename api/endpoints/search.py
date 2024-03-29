@@ -2,15 +2,15 @@ import logging
 
 from fastapi import APIRouter, Depends
 
-from dependencies import get_vector_store
-from models.SearchResults import (
+from adapters.http_models.SearchResults import (
     QuestionResponse,
     QuestionResponseData,
     SearchResult,
 )
+from adapters.VectorStore import SourceTypes, VectorStoreInterface
+from dependencies import get_vector_store
 from text.GPT.GPTInterface import GPTInterface
 from text.GPT.QuestionAnswerGPT import get_qa_model
-from text.VectorStore import SourceTypes, VectorStoreInterface
 
 logger = logging.getLogger(__name__)
 

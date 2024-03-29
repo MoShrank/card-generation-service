@@ -1,35 +1,11 @@
-from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from pydantic import BaseModel, Field
 
+from adapters.database_models.Note import Card
 from config import env_config
-from models.HttpModels import BaseResponse
-from models.MongoModel import MongoModel
+from adapters.http_models.HttpModels import BaseResponse
 
-
-class GPTCard(BaseModel):
-    question: str = Field(min_length=1, strip_whitespace=True)
-    answer: str = Field(min_length=1, strip_whitespace=True)
-
-
-# MongoDB models
-class Card(GPTCard):
-    source_start_index: int
-    source_end_index: int
-
-
-class Note(MongoModel):
-    user_id: str
-    deck_id: str
-    text: str
-    cards_added: bool
-    cards_edited: bool
-    cards: List[Card]
-    cards_edited_at: Optional[datetime]
-
-
-# HTTP Handler models
 
 
 class NoteResponseData(BaseModel):

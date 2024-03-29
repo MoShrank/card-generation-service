@@ -6,17 +6,11 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from pydantic import parse_obj_as
 
-from database.db_interface import DBInterface
-from dependencies import (
-    Collections,
-    get_pdf_storage,
-    get_pdf_to_md,
-    get_repo,
-    get_vector_store,
-)
-from models.HttpModels import EmptyResponse, HTTPException
-from models.PDF import (
-    PDFModel,
+from adapters.database_models.PDF import PDFModel
+from adapters.database_models.PyObjectID import PyObjectID
+from adapters.DBInterface import DBInterface
+from adapters.http_models.HttpModels import EmptyResponse, HTTPException
+from adapters.http_models.PDF import (
     PDFPostRes,
     PDFPostResData,
     PDFResData,
@@ -25,10 +19,16 @@ from models.PDF import (
     PDFSearchResponseData,
     ProcessingStatus,
 )
-from models.PyObjectID import PyObjectID
-from text.PDFStorage import PDFStorageInterface
-from text.SciPDFToMD import SciPDFToMDInterface
-from text.VectorStore import VectorStoreInterface
+from adapters.PDFStorage import PDFStorageInterface
+from adapters.SciPDFToMD import SciPDFToMDInterface
+from adapters.VectorStore import VectorStoreInterface
+from dependencies import (
+    Collections,
+    get_pdf_storage,
+    get_pdf_to_md,
+    get_repo,
+    get_vector_store,
+)
 
 logger = logging.getLogger(__name__)
 

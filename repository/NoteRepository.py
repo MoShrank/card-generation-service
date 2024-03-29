@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from database.connection import DBConnection
+from adapters.DBConnection import DBConnection
 from repository.BaseRepository import BaseRepository
 from repository.DBConnection import get_db_connection
 

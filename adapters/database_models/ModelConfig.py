@@ -2,7 +2,7 @@ from typing import Any, Callable, List, Literal, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from models.PyObjectID import PyObjectID
+from adapters.database_models.PyObjectID import PyObjectID
 
 
 def create_contains_placeholders_validator(

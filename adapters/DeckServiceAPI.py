@@ -2,8 +2,10 @@ from abc import ABC, abstractmethod
 from typing import List
 
 import requests
+
+from adapters.database_models.Note import Card
+from adapters.http_models.Note import DeckServiceCard
 from config import EnvConfig
-from models.Note import Card, DeckServiceCard
 
 
 class DeckServiceAPIInterface(ABC):
@@ -20,7 +22,7 @@ class DeckServiceAPI(DeckServiceAPIInterface):
         self, user_id: str, deck_id: str, cards: List[Card]
     ) -> List[DeckServiceCard]:
         url = f"http://{self.DECK_SERVICE_HOST_NAME}/decks/{deck_id}/cards?userID={user_id}"
-        data = [{"deckID": deck_id, **card} for card in cards]
+        data = [{"deckID": deck_id, **card.dict()} for card in cards]
 
         response = requests.post(url, json=data)
 

@@ -3,17 +3,17 @@ from typing import Annotated, Optional
 
 from fastapi import Depends
 
+from adapters.ChromaConnection import chroma_conn
+from adapters.DBConnection import DBConnection, get_db_connection
+from adapters.DBOperations import DBOperations
+from adapters.DeckServiceAPI import DeckServiceAPI
+from adapters.PDFStorage import PDFStorage
+from adapters.SciPDFToMD import SciPDFToMDInterface
+from adapters.VectorStore import VectorStore
 from config import env_config
-from database.connection import DBConnection, get_db_connection
-from database.operations import DBOperations
-from external.DeckServiceAPI import DeckServiceAPI
-from text.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
-from text.chroma_client import chroma_client
-from text.content.ContentExtractor import ContentExtractor
-from text.PDFStorage import PDFStorage
-from text.SciPDFToMD import SciPDFToMDInterface
-from text.TextSplitter import TextSplitter
-from text.VectorStore import VectorStore
+from lib.CardSourceGenerator import CardSourceGenerator, CardSourceGeneratorMock
+from lib.content.ContentExtractor import ContentExtractor
+from lib.TextSplitter import TextSplitter
 
 NOTES_COLLECTION = "note"
 USER_COLLECTION = "openaiUser"
@@ -31,7 +31,7 @@ class Collections(Enum):
 
 
 text_splitter = TextSplitter(1000, 70)
-vector_store = VectorStore(text_splitter, chroma_client, 3)
+vector_store = VectorStore(text_splitter, chroma_conn.get_client(), 3)
 
 pdf_to_md = Optional[SciPDFToMDInterface]
 pdf_storage = PDFStorage(env_config)

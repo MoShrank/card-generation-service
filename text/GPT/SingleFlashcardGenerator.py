@@ -1,7 +1,7 @@
 from typing import Optional
 
 from config import env_config
-from models.ModelConfig import (
+from adapters.database_models.ModelConfig import (
     GPTCard,
     Message,
     Messages,

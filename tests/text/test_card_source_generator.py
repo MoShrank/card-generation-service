@@ -1,4 +1,4 @@
-from text.CardSourceGenerator import CardSourceGenerator
+from lib.CardSourceGenerator import CardSourceGenerator
 
 
 def test_find_sentence_indices():

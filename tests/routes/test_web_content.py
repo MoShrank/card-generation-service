@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from dependencies import get_vector_store, get_web_content_repo
 from main import app
-from models.WebContent import WebContentRequest
+from adapters.http_models.WebContent import WebContentRequest
 from text.VectorStore import (
     MetaData,
     QueryFilters,

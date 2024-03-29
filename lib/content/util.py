@@ -5,8 +5,8 @@ import PyPDF2
 import requests
 from bs4 import BeautifulSoup  # type: ignore
 
-from text.content import Content
-from text.html_extraction import extract_info, extract_title
+from lib.content import Content
+from lib.scraper import extract_info, extract_title
 from util.error import retry_on_exception
 from util.scraper import get_content
 

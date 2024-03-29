@@ -4,12 +4,12 @@ from typing import List, Optional
 
 from nltk.tokenize import sent_tokenize  # type: ignore
 
+from adapters.database_models.ModelConfig import Message, Messages, ModelConfig
 from config import env_config
 from external.gpt import (
     calculate_chat_gpt_token_size,
     get_no_tokens,
 )
-from models.ModelConfig import Message, Messages, ModelConfig
 from text.GPT.GPTInterface import GPTInterface
 
 

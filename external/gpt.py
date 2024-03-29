@@ -1,7 +1,7 @@
 import openai
 import tiktoken
 
-from models.ModelConfig import Messages, ModelParameters
+from adapters.database_models.ModelConfig import Messages, ModelParameters
 
 
 def calculate_chat_gpt_token_size(messages: Messages, model: str) -> int:

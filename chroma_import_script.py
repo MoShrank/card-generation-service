@@ -1,9 +1,9 @@
 import motor.motor_asyncio
 
+from adapters.ChromaConnection import chroma_conn
+from adapters.VectorStore import VectorStore
 from config import env_config
-from text.chroma_client import chroma_client
-from text.TextSplitter import TextSplitter
-from text.VectorStore import VectorStore
+from lib.TextSplitter import TextSplitter
 
 CONN_STRING = env_config.MONGO_DB_CONNECTION
 CHROMA_PORT = env_config.CHROMA_PORT
@@ -12,6 +12,8 @@ CHROMA_HOST = env_config.CHROMA_HOST
 
 async def main():
     client = motor.motor_asyncio.AsyncIOMotorClient(CONN_STRING)
+
+    chroma_client = chroma_conn.get_client()
     db = client["spacey"]
     web_content_collection = "webContent"
     pdf_collection_name = "pdf"

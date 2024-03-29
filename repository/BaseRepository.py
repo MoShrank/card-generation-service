@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from database.connection import DBConnection
-from models.PyObjectID import PyObjectID
+from adapters.database_models.PyObjectID import PyObjectID
+from adapters.DBConnection import DBConnection
 
 
 class DBInterface(ABC):

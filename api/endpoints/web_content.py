@@ -1,19 +1,13 @@
 import logging
-from datetime import datetime
 
 from fastapi import APIRouter, Depends
 from pydantic import parse_obj_as
 
-from database.db_interface import DBInterface
-from dependencies import (
-    get_content_extractor,
-    get_vector_store,
-    get_web_content_repo,
-)
-from models.HttpModels import EmptyResponse, HTTPException
-from models.PyObjectID import PyObjectID
-from models.WebContent import (
-    WebContent,
+from adapters.database_models.PyObjectID import PyObjectID
+from adapters.database_models.WebContent import WebContent
+from adapters.DBInterface import DBInterface
+from adapters.http_models.HttpModels import EmptyResponse, HTTPException
+from adapters.http_models.WebContent import (
     WebContentCreatedResponse,
     WebContentQA,
     WebContentQAResponse,
@@ -21,11 +15,16 @@ from models.WebContent import (
     WebContentResponse,
     WebContentResponseData,
 )
-from text.content.ContentExtractor import ContentExtractor
+from adapters.VectorStore import VectorStoreInterface
+from dependencies import (
+    get_content_extractor,
+    get_vector_store,
+    get_web_content_repo,
+)
+from lib.content.ContentExtractor import ContentExtractor
 from text.GPT.GPTInterface import GPTInterface
 from text.GPT.QuestionAnswerGPT import get_qa_model
 from text.GPT.Summarizer import SummarizerInterface, get_summarizer
-from text.VectorStore import VectorStoreInterface
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +46,7 @@ async def get_posts(
 ) -> WebContentResponse:
     webContentDB = await web_content_repo.query({"user_id": userID})
 
+    print(webContentDB[0].keys())
     webpages = parse_obj_as(list[WebContentResponseData], webContentDB)
 
     return WebContentResponse(
@@ -79,8 +79,6 @@ async def create_post(
             error=str(e),
         )
 
-    now = datetime.now()
-
     text = content.content
     title = content.title
 
@@ -103,8 +101,6 @@ async def create_post(
         title=title,
         html=raw_content,
         content=text,
-        created_at=now,
-        updated_at=now,
         deleted_at=None,
         summary=summary,
     )
@@ -118,7 +114,7 @@ async def create_post(
         url=web_content.url,
         summary=web_content.summary,
         name=web_content.name,
-        created_at=web_content.created_at,
+        created_at=str(web_content.created_at),
     )
 
     vector_store.add_document(

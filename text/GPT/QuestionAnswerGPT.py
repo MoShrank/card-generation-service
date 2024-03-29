@@ -1,6 +1,6 @@
 from config import env_config
 from external.gpt import get_chatgpt_completion
-from models.ModelConfig import Message, ModelConfig
+from adapters.database_models.ModelConfig import Message, ModelConfig
 from text.GPT.GPTInterface import GPTInterface
 
 

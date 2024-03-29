@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Literal, NotRequired, Optional, TypedDict, cast
+from typing import Annotated, Literal, NotRequired, Optional, TypedDict, cast
 from uuid import uuid4
 
 from chromadb.api import ClientAPI
 from chromadb.utils import embedding_functions
+from fastapi import Depends
 
-from text.chroma_client import chroma_client
-from text.TextSplitter import TextSplitterInterface
+from adapters.ChromaConnection import get_chroma_client
+from lib.TextSplitter import TextSplitterInterface
 
 COLLECTION_NAME = "content"
 
@@ -64,7 +65,7 @@ class VectorStore(VectorStoreInterface):
     def __init__(
         self,
         document_splitter: TextSplitterInterface,
-        chroma_client: ClientAPI = chroma_client,
+        chroma_client: Annotated[ClientAPI, Depends(get_chroma_client)],
         max_query_results: int = 5,
     ):
         default_ef = embedding_functions.DefaultEmbeddingFunction()

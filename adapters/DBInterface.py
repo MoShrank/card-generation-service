@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 from pymongo.results import InsertOneResult, UpdateResult
 
-from models.PyObjectID import PyObjectID
+from adapters.database_models.PyObjectID import PyObjectID
 
 
 class DBInterface(ABC):
