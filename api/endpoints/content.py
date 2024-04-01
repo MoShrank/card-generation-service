@@ -112,15 +112,17 @@ async def download_pdf(
     id: str,
     pdf_storage: Annotated[PDFStorage, Depends()],
 ):
-    pdf = pdf_storage.download_pdf(userID, id)
-    pdf = pdf.read()
-
-    if not pdf:
+    try:
+        pdf = pdf_storage.download_pdf(userID, id)
+    except Exception as e:
+        logger.error(f"Failed to download PDF. Error: {e}")
         raise HTTPException(
             status_code=404,
-            message="PDF not found",
+            message="Failed to download PDF",
             error="PDF not found",
         )
+
+    pdf = pdf.read()
 
     return Response(content=pdf, media_type="application/pdf")
 
