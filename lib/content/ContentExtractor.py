@@ -36,7 +36,7 @@ class ContentExtractor:
 
             if content_type == "doi":
                 pdf = get_pdf_from_scihub(src)
-                content["source"] = self._doi_input_to_url(src)
+                content["source"] = pdf
 
             markdown = self._pdf_to_markdown(pdf)
 
