@@ -61,7 +61,7 @@ def extract_content_from_url(url: str) -> dict:
 
     doc = Document(raw_content)
 
-    title = doc.title()
+    title = doc.short_title()
     view_text = doc.summary()
 
     return {"title": title, "view_text": view_text, "raw_text": raw_content}
