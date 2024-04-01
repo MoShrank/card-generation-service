@@ -8,7 +8,7 @@ from config import env_config
 
 
 class ChromaConnection:
-    _client: ClientAPI
+    _chroma_client: ClientAPI
 
     def __init__(self):
         if env_config.is_dev():
@@ -17,19 +17,6 @@ class ChromaConnection:
             self._chroma_client = chromadb.HttpClient(
                 host=env_config.CHROMA_HOST, port=env_config.CHROMA_PORT
             )
-
-    async def import_data(self, collection_name: str) -> None:
-        collection = self._chroma_client.get_collection(collection_name)
-
-        if collection.count() <= 0:
-            from chroma_import_script import main
-
-            try:
-                await main()
-            except Exception as e:
-                print(f"Could not import chromaDB data from mongoDB. Error: {e}")
-        else:
-            print("Nothing to import...")
 
     async def wait_for_connection(self, timeout_seconds: int = 5) -> Optional[int]:
         start_time = asyncio.get_event_loop().time()
@@ -56,4 +43,4 @@ chroma_conn = ChromaConnection()
 
 
 def get_chroma_client():
-    return chroma_conn
+    return chroma_conn.get_client()

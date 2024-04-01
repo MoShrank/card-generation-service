@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 import boto3
 
-from config import EnvConfig
+from config import env_config
 
 
 class PDFStorageInterface(ABC):
@@ -25,9 +25,9 @@ class PDFStorageMock(PDFStorageInterface):
 
 
 class PDFStorage(PDFStorageInterface):
-    def __init__(self, config: EnvConfig):
-        self._aws_access_key_id = config.AWS_ACCESS_KEY
-        self._aws_secret_access_key = config.AWS_SECRET_KEY
+    def __init__(self):
+        self._aws_access_key_id = env_config.AWS_ACCESS_KEY
+        self._aws_secret_access_key = env_config.AWS_SECRET_KEY
         self._region = "eu-central-1"
         self._bucket_name = "spacey-pdf-storage"
 

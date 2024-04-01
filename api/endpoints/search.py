@@ -7,10 +7,10 @@ from adapters.http_models.SearchResults import (
     QuestionResponseData,
     SearchResult,
 )
-from adapters.VectorStore import SourceTypes, VectorStoreInterface
+from adapters.vector_store.VectorStore import ContentSourceType, VectorStoreInterface
 from dependencies import get_vector_store
-from text.GPT.GPTInterface import GPTInterface
-from text.GPT.QuestionAnswerGPT import get_qa_model
+from lib.GPT.GPTInterface import GPTInterface
+from lib.GPT.QuestionAnswerGPT import get_qa_model
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ router = APIRouter(
     tags=["search"],
 )
 
-INCLUDE_SOURCE_TYPES: list[SourceTypes] = ["pdf", "web"]
+INCLUDE_SOURCE_TYPES: list[ContentSourceType] = ["pdf", "web"]
 
 
 def build_gpt_context(documents: list[str]) -> str:

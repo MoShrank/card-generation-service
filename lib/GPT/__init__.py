@@ -1,5 +1,6 @@
 from .CardGeneration import get_card_generation  # noqa: F401
 from .CardGeneration import init as init_card_generation  # noqa: F401
+from .GPTInterface import GPTInterface  # noqa: F401
 from .QuestionAnswerGPT import get_qa_model  # noqa: F401
 from .QuestionAnswerGPT import init as init_qa_model  # noqa: F401
 from .SingleFlashcardGenerator import (

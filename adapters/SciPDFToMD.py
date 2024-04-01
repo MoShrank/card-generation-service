@@ -1,12 +1,15 @@
 import io
 import re
 from abc import ABC, abstractmethod
+from typing import Optional
 from uuid import uuid4
 
 import fitz  # type: ignore
 import modal
 import pypandoc  # type: ignore
 from modal.functions import FunctionCall
+
+from config import env_config
 
 
 class SciPDFToMDInterface(ABC):
@@ -148,6 +151,9 @@ class SciPDFToMD(SciPDFToMDInterface):
         images = self._pdf_to_images(pdf)
         result_id = self._predict(images)
 
+        if not result_id:
+            raise ValueError("Could not spawn modal function.")
+
         timeout_s = self._timeout_s + len(images) * 10
 
         markdown = self._get_markdown(result_id, timeout_s)
@@ -163,9 +169,9 @@ class SciPDFToMD(SciPDFToMDInterface):
 
         return markdown
 
-    def _predict(self, images: list) -> str:
+    def _predict(self, images: list) -> Optional[str]:
         res = self._modal_pred_fn.spawn(images)
-        return res.object_id
+        return res.object_id if res else None
 
     def _replace_delimiters(self, text: str) -> str:
         text = re.sub(r"\\\((.*?)\\\)", r"$\1$", text)
@@ -242,14 +248,32 @@ class SciPDFToMD(SciPDFToMDInterface):
     def _pdf_to_images(self, pdf: io.BytesIO) -> list:
         images = []
 
-        pdf = fitz.open(stream=pdf)
-        pages = range(len(pdf))
+        opened_pdf = fitz.open(stream=pdf)
+        pages = range(len(opened_pdf))
 
         for page_idx in pages:
             page_bytes: bytes = (
-                pdf[page_idx].get_pixmap(dpi=self._dpi).pil_tobytes(format="PNG")
+                opened_pdf[page_idx].get_pixmap(dpi=self._dpi).pil_tobytes(format="PNG")
             )
 
             images.append(page_bytes)
 
         return images
+
+
+pdf_to_markdown: SciPDFToMDInterface
+
+
+def init():
+    global pdf_to_markdown
+
+    if env_config.is_dev():
+        pdf_to_markdown = SciPDFToMDMock()
+    else:
+        pdf_to_markdown = SciPDFToMD()
+
+init()
+
+
+def get_pdf_to_markdown():
+    return pdf_to_markdown

@@ -6,11 +6,11 @@ from nltk.tokenize import sent_tokenize  # type: ignore
 
 from adapters.database_models.ModelConfig import Message, Messages, ModelConfig
 from config import env_config
-from external.gpt import (
+from lib.gpt import (
     calculate_chat_gpt_token_size,
     get_no_tokens,
 )
-from text.GPT.GPTInterface import GPTInterface
+from lib.GPT.GPTInterface import GPTInterface
 
 
 class SummarizerInterface(ABC):

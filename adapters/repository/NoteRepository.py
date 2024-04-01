@@ -2,9 +2,8 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from adapters.DBConnection import DBConnection
-from repository.BaseRepository import BaseRepository
-from repository.DBConnection import get_db_connection
+from adapters.DBConnection import DBConnection, get_db_connection
+from adapters.repository.BaseRepository import BaseRepository
 
 COLLECTION_NAME = "note"
 

@@ -9,7 +9,6 @@ from adapters.database_models.Note import (
     GPTCard,
     Note,
 )
-from adapters.database_models.PyObjectID import PyObjectID
 from adapters.database_models.User import User
 from adapters.DBInterface import DBInterface
 from adapters.DeckServiceAPI import DeckServiceAPIInterface
@@ -29,18 +28,15 @@ from adapters.http_models.Note import (
     UpdatedCardsResponse,
     UpdatedCardsResponseData,
 )
+from adapters.repository import NoteRepository, UserRepository
 from config import env_config
 from dependencies import (
     get_card_source_generator,
     get_deck_service,
-    get_note_repo,
-    get_user_repo,
 )
 from lib.CardSourceGenerator import CardSourceGenerator
-from repository import NoteRepository
-from text.GPT import get_card_generation, get_single_card_generator
-from text.GPT.GPTInterface import GPTInterface
-from util.limitier import limiter
+from lib.GPT import GPTInterface, get_card_generation, get_single_card_generator
+from lib.util.limitier import limiter
 
 logger = logging.getLogger("logger")
 
@@ -59,7 +55,7 @@ def map_notes_to_deck(notes: List[Dict]) -> Dict[str, Dict]:
         deck_id = note["deck_id"]
         cards = note["cards"]
 
-        notes_by_deck_id[deck_id] = {**note, "id": str(note["_id"]), "cards": cards}
+        notes_by_deck_id[deck_id] = {**note, "cards": cards}
 
     return notes_by_deck_id
 
@@ -88,7 +84,7 @@ async def generate_cards(
     body: GenerateCardsRequest,
     userID: str,
     note_repo: Annotated[NoteRepository, Depends()],
-    user_repo: DBInterface = Depends(get_user_repo),
+    user_repo: Annotated[UserRepository, Depends()],
     generate_cards: GPTInterface = Depends(get_card_generation),
     card_source_generator: CardSourceGenerator = Depends(get_card_source_generator),
 ):
@@ -121,9 +117,13 @@ async def generate_cards(
         cards_edited=False,
     ).dict(by_alias=True)
 
-    note["id"] = await note_repo.insert_one(note)
+    id = await note_repo.insert_one(note)
 
-    data = CardsResponseData(**note)
+    data = CardsResponseData(
+        id=id,
+        text=text,
+        cards=cards_with_source,
+    )
 
     return CardsResponse(message="success", data=data)
 
@@ -161,7 +161,7 @@ async def add_cards(
         )
 
     await note_repo.update_one(
-        {"_id": PyObjectID(id)},
+        {"_id": id},
         {"$set": {"cards_added": True}},
     )
 
@@ -181,7 +181,7 @@ async def update_cards(
     now = datetime.now().isoformat()
 
     await note_repo.update_one(
-        {"_id": PyObjectID(id), "user_id": userID},
+        {"_id": id, "user_id": userID},
         {
             "$set": {
                 "cards": [card.dict() for card in new_cards],
@@ -217,8 +217,8 @@ async def generate_card(
     request: Request,
     body: GenerateCardRequest,
     userID: str,
-    user_repo: DBInterface = Depends(get_user_repo),
-    note_repo: DBInterface = Depends(get_note_repo),
+    user_repo: Annotated[UserRepository, Depends()],
+    note_repo: Annotated[NoteRepository, Depends()],
     generate_card: GPTInterface = Depends(get_single_card_generator),
 ):
     openai_user_id = await get_or_create_openai_user(user_repo, userID)
@@ -239,7 +239,7 @@ async def generate_card(
     )
 
     await note_repo.update_one(
-        {"_id": PyObjectID(id), "user_id": userID},
+        {"_id": id, "user_id": userID},
         {
             "$set": {"cards_edited_at": now, "cards_edited": True},
             "$push": {"cards": {"$each": [card.dict(by_alias=True)], "$position": 0}},

@@ -33,3 +33,10 @@ class TextSplitter(TextSplitterInterface):
             end = start + self._chunk_char_size
 
         return chunks
+
+
+text_splitter = TextSplitter(1000, 70)
+
+
+def get_text_splitter():
+    return text_splitter

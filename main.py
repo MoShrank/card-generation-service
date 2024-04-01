@@ -1,29 +1,30 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-import dependencies
 from adapters import db_conn
-from adapters.ChromaConnection import chroma_conn
 from adapters.database_models.ModelConfig import (
     ModelConfig,
     QuestionAnswerGPTConfig,
 )
+from adapters.DBConnection import get_db_connection
 from adapters.http_models.HttpModels import HTTPException
-from adapters.SciPDFToMD import SciPDFToMD, SciPDFToMDMock
+from adapters.migration_script import main as migration
+from adapters.repository import ConfigRepository
+from adapters.vector_store.ChromaConnection import chroma_conn
 from api import api_router
 from config import env_config
-from text.GPT import (
+from lib.GPT import (
     init_card_generation,
     init_qa_model,
     init_single_card_generator,
     init_summarizer,
 )
-from util.limitier import limiter
+from lib.util.limitier import limiter
 
 uvicorn_logger = logging.getLogger("uvicorn")
 uvicorn_logger.propagate = False
@@ -33,7 +34,9 @@ logger = logging.getLogger(__name__)
 
 
 async def get_config(config_name: str) -> dict:
-    config = await dependencies.get_config_repo(db_conn).find_one({"name": config_name})
+    db = get_db_connection()
+    config_repo = ConfigRepository(db)
+    config = await config_repo.find_one({"name": config_name})
 
     if not config:
         logger.error(f"Could not find model config for: {config_name}")
@@ -61,8 +64,6 @@ async def setup_prod_env() -> None:
     )
     init_single_card_generator(single_card_gen_cfg)
 
-    dependencies.pdf_to_md = SciPDFToMD()
-
 
 async def setup_dev_env() -> None:
     logger.info("Development environment detected")
@@ -70,16 +71,12 @@ async def setup_dev_env() -> None:
     init_summarizer()
     init_single_card_generator()
 
-    dependencies.pdf_to_md = SciPDFToMDMock()
-
 
 env_setups = {"production": setup_prod_env, "development": setup_dev_env}
 
 
 @asynccontextmanager
-async def lifespan(
-    app: FastAPI,
-):
+async def lifespan(app: FastAPI):
     logger.info("Starting up...")
 
     logger.info("Connecting to MongoDB...")
@@ -88,8 +85,8 @@ async def lifespan(
     logger.info("Connecting to ChromaDB...")
     await chroma_conn.wait_for_connection()
 
-    logger.info("Importing data to ChromaDB...")
-    await chroma_conn.import_data("content")
+    logger.info("Migrating & Importing data")
+    await migration()
 
     await env_setups[env_config.ENV]()
 
@@ -109,7 +106,7 @@ app.include_router(api_router)
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(exception: HTTPException) -> JSONResponse:
+async def http_exception_handler(_: Request, exception: HTTPException) -> JSONResponse:
     return JSONResponse(
         status_code=exception.status_code,
         content={
@@ -118,7 +115,7 @@ async def http_exception_handler(exception: HTTPException) -> JSONResponse:
         },
     )
 
- 
+
 @app.get("/ping")
 async def ping() -> dict:
     return {"ping": "pong!"}

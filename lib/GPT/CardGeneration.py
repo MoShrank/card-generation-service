@@ -1,17 +1,16 @@
 from typing import Any, List, Optional
 
-from adapters.database_models.Note import GPTCard
 from adapters.database_models.ModelConfig import Message, Messages, ModelConfig
-
+from adapters.database_models.Note import GPTCard
 from config import env_config
-from text.GPT.GPTInterface import GPTInterface
+from lib.GPT.GPTInterface import GPTInterface
 
 
 class CardGenerationMock(GPTInterface):
     def __init__(self) -> None:
         pass
 
-    def __call__(self) -> List[GPTCard]:
+    def __call__(self, text: str, user_id: str) -> List[GPTCard]:
         return [
             GPTCard(
                 question="What is the capital of the United States?",

@@ -3,9 +3,9 @@ from typing import Any
 
 import openai
 
-from external.gpt import get_chatgpt_completion
 from adapters.database_models.ModelConfig import Messages, ModelConfig
-from util.error import retry_on_exception
+from lib.gpt import get_chatgpt_completion
+from lib.util.error import retry_on_exception
 
 
 class GPTInterface(ABC):

@@ -4,54 +4,60 @@ from typing import List
 from bson.objectid import ObjectId
 from fastapi.testclient import TestClient
 
+from adapters.http_models.Note import Card, DeckServiceCard
+from adapters.repository import NoteRepository, UserRepository
 from dependencies import (
-    get_card_generation,
     get_card_source_generator,
     get_deck_service,
-    get_note_repo,
-    get_single_card_generation,
-    get_user_repo,
 )
-from text.GPT.CardGeneration import CardGenerationMock
+from lib.GPT import (
+    get_card_generation,
+    get_single_card_generator,
+)
+from lib.GPT.CardGeneration import CardGenerationMock
+from lib.GPT.SingleFlashcardGenerator import SingleFlashcardGeneratorMock
+from lib.util.AttrDict import AttrDict
 from main import app
-from models.Note import Card, DeckServiceCard
-from text.GPT.SingleFlashcardGenerator import SingleFlashcardGeneratorMock
-from util.AttrDict import AttrDict
 
 client = TestClient(app)
 
 OBJECT_ID = ObjectId()
 
+note = {
+    "id": str(OBJECT_ID),
+    "user_id": "1",
+    "deck_id": "1",
+    "text": "text",
+    "cards_added": False,
+    "cards_edited": False,
+    "cards_edited_at": None,
+    "cards": [
+        {
+            "question": "late",
+            "answer": "late",
+            "source_start_index": 0,
+            "source_end_index": 4,
+        },
+    ],
+}
+
 
 class NoteRepoMock:
     async def query(self, query):
         return [
-            {
-                "_id": OBJECT_ID,
-                "user_id": "1",
-                "deck_id": "1",
-                "text": "text",
-                "cards_added": False,
-                "cards_edited": False,
-                "cards_edited_at": None,
-                "cards": [
-                    {
-                        "question": "late",
-                        "answer": "late",
-                        "source_start_index": 0,
-                        "source_end_index": 4,
-                    },
-                ],
-            },
+            note,
         ]
 
     async def find_one(self, query):
         return None
 
+    async def find_by_id(self, id, query):
+        return note
+
     async def insert_one(self, document):
         insertion = AttrDict()
         insertion.update({"inserted_id": OBJECT_ID})
-        return insertion
+        return str(OBJECT_ID)
 
     async def update_one(self, query, update):
         pass
@@ -99,8 +105,8 @@ def get_card_source_generator_mock():
     return CardSourceGeneratorMock()
 
 
-app.dependency_overrides[get_note_repo] = get_note_repo_mock
-app.dependency_overrides[get_user_repo] = get_user_repo_mock
+app.dependency_overrides[NoteRepository] = get_note_repo_mock
+app.dependency_overrides[UserRepository] = get_user_repo_mock
 app.dependency_overrides[get_deck_service] = get_deck_service_mock
 app.dependency_overrides[get_card_generation] = get_card_generation_mock
 app.dependency_overrides[get_card_source_generator] = get_card_source_generator_mock
@@ -250,7 +256,7 @@ def get_single_card_generation_mock():
     return SingleFlashcardGeneratorMock()
 
 
-app.dependency_overrides[get_single_card_generation] = get_single_card_generation_mock
+app.dependency_overrides[get_single_card_generator] = get_single_card_generation_mock
 
 
 def test_generate_card():

@@ -7,7 +7,7 @@ from adapters.database_models.ModelConfig import (
     Messages,
     ModelConfig,
 )
-from text.GPT.GPTInterface import GPTInterface
+from lib.GPT.GPTInterface import GPTInterface
 
 
 class SingleFlashcardGeneratorMock(GPTInterface):

@@ -6,12 +6,11 @@ from chromadb.api import ClientAPI
 from chromadb.utils import embedding_functions
 from fastapi import Depends
 
-from adapters.ChromaConnection import get_chroma_client
-from lib.TextSplitter import TextSplitterInterface
+from adapters.database_models.Content import ContentSourceType
+from adapters.vector_store.ChromaConnection import get_chroma_client
+from lib.TextSplitter import TextSplitterInterface, get_text_splitter
 
 COLLECTION_NAME = "content"
-
-SourceTypes = Literal["pdf", "web"]
 
 Include = list[
     Literal["documents", "embeddings", "metadatas", "distances", "uris", "data"]
@@ -20,13 +19,13 @@ Include = list[
 
 class QueryFilters(TypedDict):
     source_id: NotRequired[str]
-    source_type: Optional[list[SourceTypes] | SourceTypes]
+    source_type: Optional[list[ContentSourceType] | ContentSourceType]
     user_id: str
 
 
 class MetaData(TypedDict):
     source_id: str
-    source_type: SourceTypes
+    source_type: ContentSourceType
     user_id: str
 
 
@@ -64,9 +63,9 @@ class VectorStoreInterface(ABC):
 class VectorStore(VectorStoreInterface):
     def __init__(
         self,
-        document_splitter: TextSplitterInterface,
+        document_splitter: Annotated[TextSplitterInterface, Depends(get_text_splitter)],
         chroma_client: Annotated[ClientAPI, Depends(get_chroma_client)],
-        max_query_results: int = 5,
+        # TODO: fix somehow param max_query_results: int = 5,
     ):
         default_ef = embedding_functions.DefaultEmbeddingFunction()
 
@@ -74,12 +73,13 @@ class VectorStore(VectorStoreInterface):
             name=COLLECTION_NAME, embedding_function=default_ef  # type: ignore
         )
 
-        self._max_query_results = max_query_results
+        self._max_query_results = 5
         self._chunk_char_size = 1000
         self._overlap = 100
         self._document_splitter = document_splitter
 
     def add_document(self, document: str, metadata: MetaData):
+
         split_documents = self._document_splitter(document)
 
         ids = [self._generate_id() for _ in split_documents]

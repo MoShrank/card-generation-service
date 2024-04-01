@@ -1,7 +1,7 @@
 from config import env_config
-from external.gpt import get_chatgpt_completion
+from lib.gpt import get_chatgpt_completion
 from adapters.database_models.ModelConfig import Message, ModelConfig
-from text.GPT.GPTInterface import GPTInterface
+from lib.GPT.GPTInterface import GPTInterface
 
 
 class QuestionAnswerGPT(GPTInterface):

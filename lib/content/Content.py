@@ -1,8 +1,11 @@
-from dataclasses import dataclass
+from typing import TypedDict
+
+from adapters.database_models.Content import ContentSourceType
 
 
-@dataclass
-class Content:
+class Content(TypedDict):
     title: str
-    content: str
-    raw_content: str
+    source_type: ContentSourceType
+    raw_text: str = None
+    view_text: str = None
+    source: str | bytes = None

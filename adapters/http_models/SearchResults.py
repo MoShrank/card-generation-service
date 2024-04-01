@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 from adapters.http_models.HttpModels import BaseResponse
-from adapters.VectorStore import SourceTypes
+from adapters.vector_store.VectorStore import ContentSourceType
 
 
 class ChatQuestion(BaseModel):
@@ -10,7 +10,7 @@ class ChatQuestion(BaseModel):
 
 
 class SearchResult(BaseModel):
-    type: SourceTypes
+    type: ContentSourceType
     ids: list[str]
 
 
