@@ -5,7 +5,7 @@ from fastapi import Depends
 
 from adapters.database_models.Content import ContentSourceType
 from adapters.SciPDFToMD import SciPDFToMD, SciPDFToMDInterface, get_pdf_to_markdown
-from lib.content.Content import Content
+from lib.content.Content import ExtractedContent
 from lib.content.util import (
     extract_content_from_url,
     get_pdf_from_scihub,
@@ -23,7 +23,7 @@ class ContentExtractor:
     ):
         self._pdf_to_markdown = pdf_to_markdown
 
-    def __call__(self, src: ContentT) -> Content:
+    def __call__(self, src: ContentT) -> ExtractedContent:
         content_type = self.get_type_from_src(src)
 
         content = {}
@@ -36,7 +36,9 @@ class ContentExtractor:
 
             if content_type == "doi":
                 pdf = get_pdf_from_scihub(src)
-                content["source"] = pdf
+                content["source"] = self._doi_input_to_url(src)
+
+            content["pdf"] = pdf
 
             markdown = self._pdf_to_markdown(pdf)
 

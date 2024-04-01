@@ -64,16 +64,15 @@ class CreateContentUsecase:
 
             storage_ref = None
 
-            if isinstance(extracted_content["source"], bytes):
+            if "pdf" in extracted_content and extracted_content["pdf"]:
                 storage_ref = self._file_storage.upload_pdf(
-                    user_id, content_id, BytesIO(extracted_content["source"])
+                    user_id, content_id, BytesIO(extracted_content["pdf"])
                 )
-                print(storage_ref)
                 # TODO source as a keyword for different things in different
                 # structures is confusion and should be improved
                 # this is also just a workaround and improving the content data model
                 # to also include the doi as a link would be better
-                extracted_content["source"] = None  # type: ignore
+                del extracted_content["pdf"]  # type: ignore
 
             summary = self._summarizer(extracted_content["view_text"], user_id)
 
