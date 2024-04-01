@@ -1,5 +1,5 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 from io import BytesIO
 from typing import Annotated, Union
 
@@ -57,7 +57,6 @@ class CreateContentUsecase:
     async def _process_content(
         self, content_id: str, user_id: str, source: Union[str, bytes]
     ):
-        print("inside task")
         try:
             extracted_content = await run_in_threadpool(
                 lambda: self._content_extractor(source)

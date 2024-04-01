@@ -1,6 +1,7 @@
 import io
 import logging
 from typing import Optional
+from urllib.parse import urlparse
 
 import pypdf
 import requests
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+    "User-Agent": "Unknown User Agent",
 }
 
 
@@ -44,7 +45,10 @@ def get_title_from_pdf(pdf: bytes) -> Optional[str]:
 
 @retry_on_exception(exception=Exception, max_retries=3)
 def scrape_url(url: str) -> str:
-    response = requests.get(url, headers=headers)
+    target_domain = urlparse(url).netloc
+    print(target_domain)
+
+    response = requests.get(url, headers={**headers, "Host": target_domain})
 
     if response.ok:
         return response.text
