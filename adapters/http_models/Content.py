@@ -19,7 +19,6 @@ class CreateContentData(BaseModel):
     title: Optional[str] = None
     summary: Optional[str] = None
 
-    raw_text: Optional[str] = None
     view_text: Optional[str] = None
 
     storage_ref: Optional[str] = None
