@@ -15,6 +15,9 @@ class EnvConfig(BaseSettings):
     DECK_SERVICE_HOST_NAME: str = Field(
         "deck-management-service", env="DECK_MANAGEMENT_SERVICE_HOST_NAME"
     )
+    READABILITY_SERVICE_HOST_NAME: str = Field(
+        "readability-service", env="READABILITY_SERVICE_HOST_NAME"
+    )
     DATABASE: str = Field("spacey", env="DATABASE")
     ENV: Literal["development", "production"] = Field("development", env="ENV")
     MAX_TEXT_LENGTH: int = Field(1000, env="MAX_TEXT_LENGTH")

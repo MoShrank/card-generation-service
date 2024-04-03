@@ -69,7 +69,7 @@ def get_note_repo_mock():
 
 class UserRepoMock:
     async def find_one(self, query):
-        return {"_id": OBJECT_ID, "user_id": "1"}
+        return {"id": OBJECT_ID, "user_id": "1"}
 
     async def update_one(self, query, update):
         pass

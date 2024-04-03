@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 import pypdf
 import requests
 from bs4 import BeautifulSoup  # type: ignore
-from readability import Document  # type: ignore
 
 from config import env_config
 from lib.util.error import retry_on_exception
@@ -46,7 +45,6 @@ def get_title_from_pdf(pdf: bytes) -> Optional[str]:
 @retry_on_exception(exception=Exception, max_retries=3)
 def scrape_url(url: str) -> str:
     target_domain = urlparse(url).netloc
-    print(target_domain)
 
     response = requests.get(url, headers={**headers, "Host": target_domain})
 
@@ -56,6 +54,25 @@ def scrape_url(url: str) -> str:
         raise Exception(f"Failed to get content from {url}. Response: {response}")
 
 
+@retry_on_exception(exception=Exception, max_retries=3)
+def get_readability(target_url: str, raw_content: str) -> dict:
+    target_url = urlparse(target_url).netloc
+    target_url = f"https://{target_url}"
+
+    url = f"http://{env_config.READABILITY_SERVICE_HOST_NAME}/parse"
+    data = {"url": target_url, "html": raw_content}
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.ok:
+        return response.json()
+    else:
+        raise Exception(
+            f"Failed to get readability doc from {url}. Response: {response}"
+        )
+
+
 def extract_content_from_url(url: str) -> dict:
     try:
         raw_content = scrape_url(url)
@@ -63,9 +80,9 @@ def extract_content_from_url(url: str) -> dict:
         logger.error(f"Failed to extract info from webpage. Error: {e}")
         raise
 
-    doc = Document(raw_content)
+    doc = get_readability(url, raw_content)
 
-    title = doc.short_title()
-    view_text = doc.summary()
+    title = doc["title"]
+    view_text = doc["content"]
 
     return {"title": title, "view_text": view_text, "raw_text": raw_content}
