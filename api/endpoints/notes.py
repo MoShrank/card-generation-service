@@ -65,13 +65,13 @@ async def get_or_create_openai_user(user_repo: DBInterface, userID: str) -> str:
 
     if not existing_open_ai_user:
         new_open_ai_user = User(user_id=userID, total_no_generated=1)
-        result = await user_repo.insert_one(new_open_ai_user.dict(by_alias=True))
+        result = await user_repo.insert_one(new_open_ai_user.dict())
         open_ai_user_id = str(result.inserted_id)
     else:
         await user_repo.update_one(
-            {"_id": existing_open_ai_user["_id"]}, {"$inc": {"total_no_generated": 1}}
+            {"id": existing_open_ai_user["id"]}, {"$inc": {"total_no_generated": 1}}
         )
-        open_ai_user_id = str(existing_open_ai_user["_id"])
+        open_ai_user_id = existing_open_ai_user["id"]
 
     return open_ai_user_id
 
