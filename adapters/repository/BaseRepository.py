@@ -91,6 +91,7 @@ class BaseRepository(DBInterface):
 
     async def find_by_id(self, id: str | PyObjectID, query: dict | None) -> dict | None:
         query = query or {}
+        query["_id"] = id
         query = self._doc_or_query_to_obj_id(query)
 
         result = await self._collection.find_one(query)  # type: ignore
