@@ -3,7 +3,11 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from adapters.database_models.Content import ContentSourceType, ProcessingStatus
+from adapters.database_models.Content import (
+    AnnotationModel,
+    ContentSourceType,
+    ProcessingStatus,
+)
 
 
 class CreateContentRequest(BaseModel):
@@ -23,3 +27,8 @@ class CreateContentData(BaseModel):
 
     storage_ref: Optional[str] = None
     source: Optional[str] = None
+
+    annotations: list[AnnotationModel] = []
+
+class UpdateAnnotationsRequest(BaseModel):
+    annotations: list[AnnotationModel]

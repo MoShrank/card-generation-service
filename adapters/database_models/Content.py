@@ -1,9 +1,21 @@
-from typing import Any, Literal, Optional
+from typing import Literal, Optional
+
+from pydantic import BaseModel
 
 from adapters.database_models.BaseMongoModel import BaseMongoModel
 
 ProcessingStatus = Literal["processing", "processed", "failed"]
 ContentSourceType = Literal["pdf", "url", "doi"]
+
+
+class AnnotationModel(BaseModel):
+    start_path: str
+    start_offset: int
+    end_path: str
+    end_offset: int
+    color: str
+    comment: Optional[str]
+    text: str
 
 
 class ContentModel(BaseMongoModel):
@@ -20,4 +32,4 @@ class ContentModel(BaseMongoModel):
     storage_ref: Optional[str] = None
     source: Optional[str] = None
 
-    annotations: list[Any] = []
+    annotations: list[AnnotationModel] = []

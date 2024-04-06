@@ -4,7 +4,11 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, File, Query, Request, Response, UploadFile
 
 from adapters.database_models.PyObjectID import PyObjectID
-from adapters.http_models.Content import CreateContentData, CreateContentRequest
+from adapters.http_models.Content import (
+    CreateContentData,
+    CreateContentRequest,
+    UpdateAnnotationsRequest,
+)
 from adapters.http_models.HttpModels import BaseResponse, EmptyResponse, HTTPException
 from adapters.PDFStorage import PDFStorage
 from adapters.repository import ContentRepository
@@ -62,6 +66,26 @@ async def create_content(
     res_data["id"] = str(res_data["id"])
 
     return BaseResponse(message="success", data=CreateContentData(**res_data))
+
+
+@router.put("/{id}/annotation")
+async def update_annotations(
+    userID: str,
+    id: str,
+    body: UpdateAnnotationsRequest,
+    content_repository: Annotated[ContentRepository, Depends()],
+):
+    is_updated = await content_repository.update_one(
+        {"id": id, "user_id": userID},
+        {"$set": body.dict()},
+    )
+
+    if not is_updated:
+        message = "Failed to update annotations"
+    else:
+        message = "Successfully updated annotations"
+
+    return EmptyResponse(message=message)
 
 
 @router.get("", response_model=BaseResponse[list[CreateContentData]])
