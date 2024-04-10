@@ -44,9 +44,7 @@ def get_title_from_pdf(pdf: bytes) -> Optional[str]:
 
 @retry_on_exception(exception=Exception, max_retries=3)
 def scrape_url(url: str) -> str:
-    target_domain = urlparse(url).netloc
-
-    response = requests.get(url, headers={**headers, "Host": target_domain})
+    response = requests.get(url, headers={**headers})
 
     if response.ok:
         return response.text
