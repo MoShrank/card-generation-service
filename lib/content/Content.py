@@ -10,3 +10,4 @@ class ExtractedContent(TypedDict):
     view_text: str = None
     source: str = None
     pdf: Optional[bytes] = None
+    image: Optional[str] = None

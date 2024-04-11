@@ -33,3 +33,4 @@ class ContentModel(BaseMongoModel):
     source: Optional[str] = None
 
     annotations: list[AnnotationModel] = []
+    image: Optional[str] = None

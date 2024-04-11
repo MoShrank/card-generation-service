@@ -29,6 +29,8 @@ class CreateContentData(BaseModel):
     source: Optional[str] = None
 
     annotations: list[AnnotationModel] = []
+    image: Optional[str] = None
+
 
 class UpdateAnnotationsRequest(BaseModel):
     annotations: list[AnnotationModel]

@@ -8,7 +8,10 @@ RUN apt-get update -y
 RUN apt-get update; apt-get install curl -y
 RUN apt-get install build-essential -y
 RUN apt-get install pandoc -y
-
+RUN apt-get update && \
+    apt-get install -y libwebp-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 RUN mkdir /app
 
 WORKDIR /app
