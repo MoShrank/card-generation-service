@@ -110,9 +110,6 @@ def get_image_from_html(readability: str) -> Optional[str]:
     for img in images:
         img_src = img.get("src")
 
-        if "Schopenhauer" in img_src:
-            print("foound", img_src)
-
         if not img_src:
             continue
         try:
@@ -125,7 +122,6 @@ def get_image_from_html(readability: str) -> Optional[str]:
 
         except Exception as e:
             if "Schopenhauer" in img_src:
-                print("error in", img_src)
                 logger.error(f"Failed to get image from {img_src}. Error: {e}")
             continue
 
