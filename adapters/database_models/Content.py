@@ -34,3 +34,5 @@ class ContentModel(BaseMongoModel):
 
     annotations: list[AnnotationModel] = []
     image: Optional[str] = None
+
+    read_status: bool = False

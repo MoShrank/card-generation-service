@@ -11,6 +11,7 @@ class BaseResponse(BaseModel, Generic[DataT]):
 
 
 class EmptyResponse(BaseModel):
+    status_code: int = 200
     message: str
 
 

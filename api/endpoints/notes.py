@@ -10,7 +10,6 @@ from adapters.database_models.Note import (
     Note,
 )
 from adapters.database_models.User import User
-from adapters.DBInterface import DBInterface
 from adapters.DeckServiceAPI import DeckServiceAPIInterface
 from adapters.http_models.HttpModels import HTTPException
 from adapters.http_models.Note import (
@@ -60,13 +59,12 @@ def map_notes_to_deck(notes: List[Dict]) -> Dict[str, Dict]:
     return notes_by_deck_id
 
 
-async def get_or_create_openai_user(user_repo: DBInterface, userID: str) -> str:
-    existing_open_ai_user: Dict = await user_repo.find_one({"user_id": userID})
+async def get_or_create_openai_user(user_repo: UserRepository, userID: str) -> str:
+    existing_open_ai_user = await user_repo.find_one({"user_id": userID})
 
     if not existing_open_ai_user:
         new_open_ai_user = User(user_id=userID, total_no_generated=1)
-        result = await user_repo.insert_one(new_open_ai_user.dict())
-        open_ai_user_id = str(result.inserted_id)
+        open_ai_user_id = await user_repo.insert_one(new_open_ai_user.dict())
     else:
         await user_repo.update_one(
             {"id": existing_open_ai_user["id"]}, {"$inc": {"total_no_generated": 1}}

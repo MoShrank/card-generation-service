@@ -13,7 +13,6 @@ from adapters.database_models.ModelConfig import (
 )
 from adapters.DBConnection import get_db_connection
 from adapters.http_models.HttpModels import HTTPException
-from adapters.migration_script import main as migration
 from adapters.repository import ConfigRepository
 from adapters.vector_store.ChromaConnection import chroma_conn
 from api import api_router
@@ -85,9 +84,6 @@ async def lifespan(app: FastAPI):
     logger.info("Connecting to ChromaDB...")
     await chroma_conn.wait_for_connection()
 
-    logger.info("Migrating & Importing data")
-    await migration()
-
     await env_setups[env_config.ENV]()
 
     logger.info("Loading Question Answer GPT model...")
@@ -106,7 +102,10 @@ app.include_router(api_router)
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(_: Request, exception: HTTPException) -> JSONResponse:
+async def http_exception_handler(
+    req: Request, exception: HTTPException
+) -> JSONResponse:
+    logger.error(f"{req.url.path} - Failed to process request. Error {exception.error}")
     return JSONResponse(
         status_code=exception.status_code,
         content={

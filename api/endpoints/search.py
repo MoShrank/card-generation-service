@@ -1,4 +1,5 @@
 import logging
+from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
@@ -7,8 +8,10 @@ from adapters.http_models.SearchResults import (
     QuestionResponseData,
     SearchResult,
 )
-from adapters.vector_store.VectorStore import ContentSourceType, VectorStoreInterface
-from dependencies import get_vector_store
+from adapters.vector_store.VectorStore import (
+    ContentSourceType,
+    VectorStore,
+)
 from lib.GPT.GPTInterface import GPTInterface
 from lib.GPT.QuestionAnswerGPT import get_qa_model
 
@@ -20,7 +23,7 @@ router = APIRouter(
     tags=["search"],
 )
 
-INCLUDE_SOURCE_TYPES: list[ContentSourceType] = ["pdf", "web"]
+INCLUDE_SOURCE_TYPES: list[ContentSourceType] = ["pdf", "url", "doi"]
 
 
 def build_gpt_context(documents: list[str]) -> str:
@@ -40,8 +43,8 @@ def build_gpt_context(documents: list[str]) -> str:
 async def search(
     userID: str,
     query: str,
+    vector_store: Annotated[VectorStore, Depends()],
     qa_gpt: GPTInterface = Depends(get_qa_model),
-    vector_store: VectorStoreInterface = Depends(get_vector_store),
 ):
     results = vector_store.query(
         query,

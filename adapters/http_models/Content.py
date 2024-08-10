@@ -14,7 +14,11 @@ class CreateContentRequest(BaseModel):
     source: str = Field(...)
 
 
-class CreateContentData(BaseModel):
+class UpdateContentData(BaseModel):
+    read_status: bool
+
+
+class ContentData(BaseModel):
     id: str
     source_type: ContentSourceType
     processing_status: ProcessingStatus
@@ -30,6 +34,8 @@ class CreateContentData(BaseModel):
 
     annotations: list[AnnotationModel] = []
     image: Optional[str] = None
+
+    read_status: bool = False
 
 
 class UpdateAnnotationsRequest(BaseModel):
