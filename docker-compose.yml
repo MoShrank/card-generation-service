@@ -6,7 +6,6 @@ services:
     env_file:
       - .env
     environment:
-      MONGO_DB_CONNECTION: "mongodb://mongodb:27017"
       MODEL_PATH: "/Users/moritzeich/dev/spacey/card-generation-service/distilbert-base-cased-distilled-squad"
     volumes:
       - /Users/moritzeich/dev/spacey/card-generation-service/distilbert-base-cased-distilled-squad:/Users/moritzeich/dev/spacey/card-generation-service/distilbert-base-cased-distilled-squad
@@ -14,6 +13,13 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port ${PORT} --log-level ${LOG_LEVEL} --workers 1 --reload
     ports:
       - "3333:${PORT}"
+    networks:
+      - spacey-services
+    depends_on:
+      - chroma
+  chroma:
+    image: chromadb/chroma
+    container_name: chroma
     networks:
       - spacey-services
 
